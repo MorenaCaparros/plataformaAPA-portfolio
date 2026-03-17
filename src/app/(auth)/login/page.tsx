@@ -4,11 +4,18 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 
+const DEMO_USERS = [
+  { label: 'Admin',             email: 'admin@demo.apa',       password: 'Demo1234!', emoji: '🛡️' },
+  { label: 'Equipo Profesional', email: 'equipo@demo.apa',      password: 'Demo1234!', emoji: '🎓' },
+  { label: 'Voluntario',        email: 'voluntario1@demo.apa', password: 'Demo1234!', emoji: '🙋' },
+];
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -51,6 +58,23 @@ export default function LoginPage() {
     } catch (error: any) {
       setError(error.message || 'Error al iniciar sesión con Google');
       setGoogleLoading(false);
+    }
+  };
+
+  const handleDemoLogin = async (demoEmail: string, demoPassword: string, label: string) => {
+    setDemoLoading(label);
+    setError(null);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: demoPassword,
+      });
+      if (error) throw error;
+      if (data.user) window.location.href = '/dashboard';
+    } catch (error: any) {
+      setError('No se pudo acceder al usuario demo. Verificá que esté creado en Supabase.');
+    } finally {
+      setDemoLoading(null);
     }
   };
 
@@ -211,6 +235,36 @@ export default function LoginPage() {
             >
               Registrate aquí
             </Link>
+          </div>
+        </div>
+
+        {/* Acceso rápido demo */}
+        <div className="bg-white/60 backdrop-blur-lg rounded-3xl border border-sol-400/20 shadow-glow-sol p-6">
+          <p className="text-center text-sm font-semibold text-neutro-carbon mb-1">🚀 Acceso rápido — modo demo</p>
+          <p className="text-center text-xs text-neutro-piedra mb-4">Sin registrarse, explorá cada rol</p>
+          <div className="flex flex-col gap-2">
+            {DEMO_USERS.map((u) => (
+              <button
+                key={u.label}
+                type="button"
+                disabled={!!demoLoading}
+                onClick={() => handleDemoLogin(u.email, u.password, u.label)}
+                className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-sol-400/10 border border-sol-400/20 hover:bg-sol-400/20 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed min-h-[48px]"
+              >
+                <span className="flex items-center gap-2 text-sm font-medium text-neutro-carbon">
+                  <span>{u.emoji}</span>
+                  {u.label}
+                </span>
+                {demoLoading === u.label ? (
+                  <svg className="animate-spin h-4 w-4 text-crecimiento-500" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                ) : (
+                  <span className="text-xs text-neutro-piedra font-mono">{u.email}</span>
+                )}
+              </button>
+            ))}
           </div>
         </div>
 

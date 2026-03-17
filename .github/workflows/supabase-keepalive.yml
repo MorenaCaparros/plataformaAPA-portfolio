@@ -1,0 +1,60 @@
+# ─────────────────────────────────────────────────────────────────
+# supabase-keepalive.yml
+#
+# PROPÓSITO:
+#   Supabase free pausa automáticamente un proyecto si no recibe
+#   actividad durante 7 días. Este workflow hace un ping cada 4 días
+#   al endpoint /api/health del deploy de Netlify para mantenerlo vivo.
+#
+# CONFIGURACIÓN (una sola vez):
+#   1. Ir a GitHub → Settings → Secrets and variables → Actions
+#   2. Agregar un secret llamado: APP_URL
+#      Valor: la URL de Netlify, ej: https://plataforma-apa.netlify.app
+#
+# NOTA: No expone ningún dato sensible. /api/health solo devuelve
+#       { status: "ok", db: "connected" } — es un endpoint público.
+# ─────────────────────────────────────────────────────────────────
+
+name: Supabase Keep-Alive
+
+on:
+  schedule:
+    # Corre cada 4 días a las 08:00 UTC
+    # (7 días es el límite de Supabase, 4 días deja margen)
+    - cron: '0 8 */4 * *'
+  # También se puede disparar manualmente desde GitHub Actions
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping /api/health
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping health endpoint
+        run: |
+          echo "📡 Haciendo ping a ${{ secrets.APP_URL }}/api/health"
+          
+          RESPONSE=$(curl --silent --max-time 30 \
+            --write-out "\nHTTP_STATUS:%{http_code}" \
+            "${{ secrets.APP_URL }}/api/health")
+          
+          HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
+          BODY=$(echo "$RESPONSE" | grep -v "HTTP_STATUS:")
+          
+          echo "Respuesta: $BODY"
+          echo "HTTP Status: $HTTP_STATUS"
+          
+          if [ "$HTTP_STATUS" = "200" ]; then
+            echo "✅ Supabase activo"
+          else
+            echo "⚠️  El endpoint respondió con status $HTTP_STATUS"
+            echo "    Verificar que APP_URL está configurado en GitHub Secrets"
+            # No falla el workflow — puede ser que el deploy aún no exista
+            exit 0
+          fi
+
+      - name: Resultado
+        if: always()
+        run: echo "Ping completado — $(date -u '+%Y-%m-%d %H:%M UTC')"

@@ -1,8 +1,5 @@
 import { createBrowserClient, type CookieOptions } from '@supabase/ssr';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
 // 400 días en segundos — igual que el middleware
 const SESSION_MAX_AGE = 60 * 60 * 24 * 400;
 
@@ -16,24 +13,40 @@ function parseCookies(): Record<string, string> {
   }, {} as Record<string, string>);
 }
 
-// createBrowserClient de @supabase/ssr gestiona las cookies con maxAge explícito.
-// La persistencia de sesión está asegurada por:
-// 1. cookieOptions con maxAge 400 días → las cookies NO expiran al cerrar el navegador
-// 2. window.location.href (redirect completo) luego de signInWithPassword en el login
-// 3. El middleware que refresca el access token con el refresh token en cada request
-export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey, {
-  cookies: {
-    get(name: string) {
-      return parseCookies()[name];
+function createClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+  // createBrowserClient de @supabase/ssr gestiona las cookies con maxAge explícito.
+  // La persistencia de sesión está asegurada por:
+  // 1. cookieOptions con maxAge 400 días → las cookies NO expiran al cerrar el navegador
+  // 2. window.location.href (redirect completo) luego de signInWithPassword en el login
+  // 3. El middleware que refresca el access token con el refresh token en cada request
+  return createBrowserClient(url, key, {
+    cookies: {
+      get(name: string) {
+        return parseCookies()[name];
+      },
+      set(name: string, value: string, options: CookieOptions) {
+        const secure = process.env.NODE_ENV === 'production' ? '; secure' : '';
+        document.cookie = `${name}=${encodeURIComponent(value)}; path=${options.path ?? '/'}; max-age=${SESSION_MAX_AGE}; samesite=lax${secure}`;
+      },
+      remove(name: string, options: CookieOptions) {
+        const secure = process.env.NODE_ENV === 'production' ? '; secure' : '';
+        document.cookie = `${name}=; path=${options.path ?? '/'}; max-age=0; samesite=lax${secure}`;
+      },
     },
-    set(name: string, value: string, options: CookieOptions) {
-      const secure = process.env.NODE_ENV === 'production' ? '; secure' : '';
-      document.cookie = `${name}=${encodeURIComponent(value)}; path=${options.path ?? '/'}; max-age=${SESSION_MAX_AGE}; samesite=lax${secure}`;
-    },
-    remove(name: string, options: CookieOptions) {
-      // Incluir samesite y secure igual que en set() para que el browser haga match
-      const secure = process.env.NODE_ENV === 'production' ? '; secure' : '';
-      document.cookie = `${name}=; path=${options.path ?? '/'}; max-age=0; samesite=lax${secure}`;
-    },
+  });
+}
+
+// Proxy con lazy init: el cliente real se crea en el primer acceso (navegador),
+// no al importar el módulo (evita errores durante el build de Next.js).
+let _client: ReturnType<typeof createClient> | null = null;
+const handler: ProxyHandler<object> = {
+  get(_target, prop, receiver) {
+    if (!_client) _client = createClient();
+    const value = Reflect.get(_client, prop, receiver);
+    return typeof value === 'function' ? value.bind(_client) : value;
   },
-});
+};
+
+export const supabase = new Proxy({}, handler) as ReturnType<typeof createClient>;

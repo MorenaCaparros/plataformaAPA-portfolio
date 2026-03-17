@@ -1,13 +1,7 @@
 // ENDPOINT TEMPORAL DE DIAGNÓSTICO — solo disponible en development
 // Uso: GET /api/debug/asignaciones?voluntario_id=<uuid>
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-);
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 export async function GET(request: NextRequest) {
   // Bloquear completamente en producción

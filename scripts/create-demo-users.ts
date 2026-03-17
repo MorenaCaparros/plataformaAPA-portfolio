@@ -1,17 +1,17 @@
 /**
  * scripts/create-demo-users.ts
  * ----------------------------
- * Crea los usuarios de autenticación para el proyecto demo.
+ * Crea los usuarios de autenticación para el proyecto demo en Supabase.
  *
- * Requiere:
- *   - NEXT_PUBLIC_SUPABASE_URL
- *   - SUPABASE_SERVICE_ROLE_KEY
- *   ambos en .env.local
+ * IMPORTANTE: Los IDs aquí deben coincidir EXACTAMENTE con los IDs
+ * del archivo scripts/demo-seed.sql. Así auth.users y perfiles se vinculan.
  *
- * Uso:
+ * Requiere en .env.local:
+ *   NEXT_PUBLIC_SUPABASE_URL
+ *   SUPABASE_SERVICE_ROLE_KEY
+ *
+ * Uso (DESPUÉS de haber corrido demo-seed.sql en Supabase):
  *   npx tsx scripts/create-demo-users.ts
- *
- * ⚠️  Ejecutar DESPUÉS de haber corrido demo-seed.sql en Supabase.
  */
 
 import { createClient } from '@supabase/supabase-js';
@@ -22,7 +22,6 @@ const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
   console.error('❌ Faltan variables de entorno.');
   console.error('   Crear .env.local con NEXT_PUBLIC_SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY');
-  console.error('   Ver .env.example para referencia.');
   process.exit(1);
 }
 
@@ -30,15 +29,38 @@ const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
+// IDs fijos que coinciden con demo-seed.sql
 const DEMO_USERS = [
-  { email: 'admin@demo.apa',       password: 'Demo1234!', nombre: 'Ana García',      rol: 'admin' },
-  { email: 'coord1@demo.apa',      password: 'Demo1234!', nombre: 'Marcos Rodríguez', rol: 'coordinador' },
-  { email: 'coord2@demo.apa',      password: 'Demo1234!', nombre: 'Valeria López',   rol: 'coordinador' },
-  { email: 'psico@demo.apa',       password: 'Demo1234!', nombre: 'Laura Méndez',    rol: 'psicopedagogia' },
-  { email: 'social@demo.apa',      password: 'Demo1234!', nombre: 'Sandra Peralta',  rol: 'trabajo_social' },
-  { email: 'voluntario1@demo.apa', password: 'Demo1234!', nombre: 'Diego Torres',    rol: 'voluntario' },
-  { email: 'voluntario2@demo.apa', password: 'Demo1234!', nombre: 'Sofía Martínez',  rol: 'voluntario' },
-  { email: 'voluntario3@demo.apa', password: 'Demo1234!', nombre: 'Tomás Flórez',    rol: 'voluntario' },
+  {
+    id: 'b1000000-0000-0000-0000-000000000001',
+    email: 'admin@demo.apa',
+    password: 'Demo1234!',
+    nombre: 'Ana', apellido: 'García', rol: 'admin',
+  },
+  {
+    id: 'b1000000-0000-0000-0000-000000000002',
+    email: 'equipo@demo.apa',
+    password: 'Demo1234!',
+    nombre: 'Laura', apellido: 'Méndez', rol: 'equipo_profesional',
+  },
+  {
+    id: 'b1000000-0000-0000-0000-000000000006',
+    email: 'voluntario1@demo.apa',
+    password: 'Demo1234!',
+    nombre: 'Diego', apellido: 'Torres', rol: 'voluntario',
+  },
+  {
+    id: 'b1000000-0000-0000-0000-000000000007',
+    email: 'voluntario2@demo.apa',
+    password: 'Demo1234!',
+    nombre: 'Sofía', apellido: 'Martínez', rol: 'voluntario',
+  },
+  {
+    id: 'b1000000-0000-0000-0000-000000000008',
+    email: 'voluntario3@demo.apa',
+    password: 'Demo1234!',
+    nombre: 'Tomás', apellido: 'Flórez', rol: 'voluntario',
+  },
 ];
 
 async function createDemoUsers() {
@@ -46,14 +68,16 @@ async function createDemoUsers() {
 
   for (const user of DEMO_USERS) {
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
+      // Especificar el ID garantiza que coincida con los perfiles del seed
+      id: user.id,
       email: user.email,
       password: user.password,
       email_confirm: true,
-      user_metadata: { nombre: user.nombre, rol: user.rol },
+      user_metadata: { nombre: user.nombre, apellido: user.apellido, rol: user.rol },
     });
 
     if (error) {
-      if (error.message.includes('already been registered')) {
+      if (error.message.includes('already been registered') || error.message.includes('already exists')) {
         console.log(`  ↩  ${user.email} — ya existe`);
       } else {
         console.error(`  ❌ ${user.email} — ${error.message}`);
@@ -63,14 +87,14 @@ async function createDemoUsers() {
     }
   }
 
-  console.log('\n─────────────────────────────────────────');
-  console.log('🔑 Credenciales de acceso (todos los usuarios):');
+  console.log('\n─────────────────────────────────────────────────');
+  console.log('🔑 Credenciales de acceso (todas las cuentas):');
   console.log('   Password: Demo1234!\n');
-  DEMO_USERS.forEach((u) => {
-    const pad = ' '.repeat(30 - u.email.length);
-    console.log(`   ${u.email}${pad}→ ${u.rol}`);
-  });
-  console.log('\n✅ Ejecutar: npm run dev');
+  console.log('   admin@demo.apa           → Admin');
+  console.log('   equipo@demo.apa          → Equipo Profesional');
+  console.log('   voluntario1@demo.apa     → Voluntario');
+  console.log('\n✅ Listo. Levantar el servidor: npm run dev');
 }
 
 createDemoUsers().catch(console.error);
+

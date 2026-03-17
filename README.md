@@ -25,7 +25,7 @@ Esta plataforma digitaliza ese proceso: un formulario mobile-first que se comple
 | Frontend | Next.js 14 (App Router) + TypeScript + Tailwind CSS |
 | Componentes UI | shadcn/ui + Radix UI |
 | Backend / DB | Supabase (PostgreSQL 15 + Auth + Storage + RLS) |
-| IA / Análisis | Google Gemini 1.5 Flash + LangChain.js |
+| IA / Análisis | Google Gemini 1.5 Flash + OpenRouter (free tier) + LangChain.js |
 | Estado del servidor | TanStack Query v5 |
 | Estado global | Zustand |
 | Offline / PWA | Dexie.js (IndexedDB) + Service Worker |
@@ -49,7 +49,7 @@ Biblioteca psicopedagógica indexada con embeddings. Los profesionales pueden ha
 Las sesiones se guardan localmente en IndexedDB cuando no hay conexión y se sincronizan automáticamente al reconectar. Indicador visual permanente de estado (online / offline / sincronizando).
 
 **Control de acceso por roles con anonimización**  
-Cinco roles con permisos diferenciados: Voluntario, Coordinador, Trabajo Social, Psicopedagogía y Admin. Los voluntarios ven solo el alias del niño; nombre completo y datos sensibles están restringidos a roles habilitados. Row Level Security implementado en PostgreSQL para que las restricciones operen a nivel de base de datos.
+Tres roles con permisos diferenciados: Voluntario, Equipo Profesional y Admin. Los voluntarios ven solo el alias del niño; nombre completo y datos sensibles están restringidos a roles habilitados. Row Level Security implementado en PostgreSQL para que las restricciones operen a nivel de base de datos.
 
 **Dashboard ejecutivo**  
 Métricas de impacto por zona, voluntario y período. Exportación de reportes en PDF. Sistema de feedback cuantitativo a voluntarios con análisis de Gemini.
@@ -80,48 +80,43 @@ Los campos `nombre_completo` y `fecha_nacimiento` se encriptan con AES-256 antes
 
 ## Levantar el proyecto localmente
 
-### Opción A — Demo sin credenciales externas
+### Requisito previo: crear el proyecto en Supabase (gratis)
+
+1. Crear proyecto en [supabase.com](https://supabase.com) (plan Free, región US East)
+2. En SQL Editor, ejecutar **en orden** los archivos de `supabase/migrations/`:
+   ```
+   00000000_schema_base.sql          ← primero siempre
+   20260118_sistema_capacitacion_voluntarios.sql
+   20260124_rls_capacitaciones.sql
+   20260125_sistema_autoevaluaciones.sql
+   20260302_fix_rls_voluntarios_capacitaciones.sql
+   20260302_rls_ninos_sesiones_asistencias.sql
+   20260302_rls_preguntas_capacitacion.sql
+   20260305_asistencia.sql
+   20260305_ia_chat.sql
+   fix-rls-plantillas-autoevaluacion.sql
+   ```
+3. En SQL Editor, ejecutar `scripts/demo-seed.sql`
+
+### Instalar y correr
 
 ```bash
 git clone https://github.com/TU_USUARIO/plataforma-apa.git
 cd plataforma-apa
 npm install
 cp .env.example .env.local
-# En .env.local setear: NEXT_PUBLIC_DEMO_MODE=true
+# Editar .env.local con las credenciales de Supabase (ver instrucciones dentro)
+npm run demo:seed-users   # Crea los 5 usuarios demo en Supabase Auth
 npm run dev
 ```
 
-La aplicación levanta con datos ficticios internos, sin necesidad de Supabase ni API Key de Gemini.
+Usuarios disponibles en modo demo (password universal: `Demo1234!`):
 
-Usuarios disponibles en modo demo:
-
-| Email | Password | Rol |
-|---|---|---|
-| `admin@demo.apa` | `Demo1234!` | Admin |
-| `coord1@demo.apa` | `Demo1234!` | Coordinador |
-| `psico@demo.apa` | `Demo1234!` | Psicopedagogía |
-| `voluntario1@demo.apa` | `Demo1234!` | Voluntario |
-
----
-
-### Opción B — Con Supabase propio
-
-```bash
-git clone https://github.com/TU_USUARIO/plataforma-apa.git
-cd plataforma-apa
-npm install
-cp .env.example .env.local
-# Editar .env.local con las credenciales (ver instrucciones dentro del archivo)
-```
-
-Luego en Supabase SQL Editor:
-1. Ejecutar las migraciones de `supabase/migrations/` en orden por fecha
-2. Ejecutar `scripts/demo-seed.sql`
-
-```bash
-npm run demo:seed-users   # Crea los usuarios demo en Supabase Auth
-npm run dev
-```
+| Email | Rol |
+|---|---|
+| `admin@demo.apa` | Admin |
+| `equipo@demo.apa` | Equipo Profesional |
+| `voluntario1@demo.apa` | Voluntario |
 
 ---
 

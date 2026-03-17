@@ -1,20 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin } from '@/lib/supabase/admin';
 
 // Forzar runtime dinámico porque usa request.headers
 export const dynamic = 'force-dynamic';
 
-// Cliente admin con service role key
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-);
 
 // Helper: verificar auth y obtener perfil
 async function verificarAuth(request: NextRequest, rolesPermitidos: string[]) {

@@ -1,7 +1,8 @@
 // Sistema RAG para búsqueda semántica en documentos
+// Nota: usa el cliente admin porque se ejecuta server-side (API routes)
 
 import { getEmbeddingModel } from './gemini';
-import { supabase } from '../supabase/client';
+import { supabase } from '../supabase/admin';
 
 /**
  * Genera embeddings usando Gemini (gratis)

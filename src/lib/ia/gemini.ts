@@ -1,161 +1,149 @@
-// Configuración de Gemini AI
+// ============================================================
+// Módulo de IA - Plataforma APA
+// Estrategia: Google Gemini (primario) → OpenRouter (fallback)
+// ============================================================
 
 import { GoogleGenerativeAI, GenerativeModel } from '@google/generative-ai';
 
-// Inicialización lazy para evitar errores durante el build
+// ─── Instancias lazy (evitan errores durante el build) ────────────────────
 let genAI: GoogleGenerativeAI | null = null;
 let model: GenerativeModel | null = null;
 let embeddingModel: GenerativeModel | null = null;
 
-// Función para obtener la instancia de Gemini (lazy initialization)
 function getGenAI(): GoogleGenerativeAI {
   if (!genAI) {
     const apiKey = process.env.GOOGLE_AI_API_KEY;
-    if (!apiKey) {
-      throw new Error('GOOGLE_AI_API_KEY no está configurada');
-    }
+    if (!apiKey) throw new Error('GOOGLE_AI_API_KEY no está configurada');
     genAI = new GoogleGenerativeAI(apiKey);
   }
   return genAI;
 }
 
-// Función para obtener el modelo de chat (lazy initialization)
-// Usa el primer modelo de la lista de fallback como preferido
 export function getModel(): GenerativeModel {
   if (!model) {
-    model = getGenAI().getGenerativeModel({ 
-      model: 'gemini-2.5-flash',
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 8192,
-      }
+    model = getGenAI().getGenerativeModel({
+      model: 'gemini-2.0-flash-exp',
+      generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 8192 },
     });
   }
   return model;
 }
 
-// Función para obtener el modelo de embeddings (lazy initialization)
 export function getEmbeddingModel(): GenerativeModel {
   if (!embeddingModel) {
-    // embedding-001: compatible con v1beta, 768 dims
     embeddingModel = getGenAI().getGenerativeModel({ model: 'embedding-001' });
   }
   return embeddingModel;
 }
 
-// Exportar para compatibilidad con código existente
-// NOTA: Usar getModel() y getEmbeddingModel() en su lugar
+// Alias de compatibilidad
 export { getGenAI as genAI };
 
-// ─── Rotación de API keys ──────────────────────────────────────────────────
-// Soporta hasta 5 keys: GOOGLE_AI_API_KEY, GOOGLE_AI_API_KEY_2, ..., GOOGLE_AI_API_KEY_5
-// Útil en tests multi-usuario para evitar rate limits del plan gratis (15 RPM por key)
-
-function getApiKeys(): string[] {
-  // Orden: KEY_2..KEY_5 primero, KEY_1 como último recurso
-  return [
-    process.env.GOOGLE_AI_API_KEY_2,
-    process.env.GOOGLE_AI_API_KEY_3,
-    process.env.GOOGLE_AI_API_KEY_4,
-    process.env.GOOGLE_AI_API_KEY_5,
-    process.env.GOOGLE_AI_API_KEY,   // fallback
-  ].filter(Boolean) as string[];
-}
-
-// ─── Modelos en orden de preferencia (el primero que funcione se usa) ─────
-// Si Google depreca uno, la función cae automáticamente al siguiente.
-const MODELOS_FALLBACK = [
-  'gemini-2.5-flash',          // más reciente con plan free (2026)
-  'gemini-2.5-flash-preview-04-17', // preview alternativo
-  'gemini-2.0-flash-exp',      // experimental/gratis
-  'gemini-1.5-flash-8b',       // versión ligera 1.5
-  'gemini-1.5-pro',            // 1.5 pro como último recurso
+// ─── Modelos Gemini en orden de preferencia ────────────────────────────────
+const MODELOS_GEMINI = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash-exp',
+  'gemini-1.5-flash-8b',
+  'gemini-1.5-pro',
 ];
 
-/**
- * Genera texto con Gemini rotando keys Y modelos automáticamente.
- * - 429 (rate limit) → prueba la siguiente key con el mismo modelo
- * - 404 / deprecado → descarta el modelo y prueba el siguiente de la lista
- */
-export async function callGeminiWithKeyRotation(prompt: string): Promise<string> {
-  const keys = getApiKeys();
+// ─── Fallback OpenRouter ───────────────────────────────────────────────────
+// API compatible con OpenAI. Modelo gratuito: google/gemini-2.0-flash-exp:free
+// Docs: https://openrouter.ai/docs
+async function callOpenRouter(prompt: string): Promise<string> {
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) throw new Error('OPENROUTER_API_KEY no está configurada');
 
-  if (keys.length === 0) {
-    throw new Error('GOOGLE_AI_API_KEY no está configurada');
+  const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://plataforma-apa.netlify.app',
+      'X-Title': 'Plataforma APA',
+    },
+    body: JSON.stringify({
+      model: 'google/gemini-2.0-flash-exp:free',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.7,
+      max_tokens: 4096,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`OpenRouter error ${response.status}: ${error}`);
   }
 
-  let ultimoError: any;
+  const data = await response.json();
+  return data.choices?.[0]?.message?.content ?? '';
+}
 
-  for (const modelName of MODELOS_FALLBACK) {
-    let modelDisponible = true;
+// ─── Función principal: Gemini → OpenRouter ────────────────────────────────
+/**
+ * Intenta generar texto con Google Gemini (key primaria).
+ * Si Gemini falla por rate limit o error, cae automáticamente a OpenRouter.
+ */
+export async function callGeminiWithKeyRotation(prompt: string): Promise<string> {
+  const googleKey = process.env.GOOGLE_AI_API_KEY;
+  let ultimoErrorGemini: any;
 
-    for (const key of keys) {
+  // ── Intentar con Google Gemini ──
+  if (googleKey) {
+    for (const modelName of MODELOS_GEMINI) {
       try {
-        const ai = new GoogleGenerativeAI(key);
-        const model = ai.getGenerativeModel({
+        const ai = new GoogleGenerativeAI(googleKey);
+        const geminiModel = ai.getGenerativeModel({
           model: modelName,
-          generationConfig: {
-            temperature: 0.7,
-            topK: 40,
-            topP: 0.95,
-            maxOutputTokens: 4096,
-          },
+          generationConfig: { temperature: 0.7, topK: 40, topP: 0.95, maxOutputTokens: 4096 },
         });
-        const result = await model.generateContent(prompt);
+        const result = await geminiModel.generateContent(prompt);
         return result.response.text();
       } catch (err: any) {
-        ultimoError = err;
+        ultimoErrorGemini = err;
         const status = err?.status || err?.httpErrorCode;
         const msg: string = err?.message || '';
 
-        // 429 = rate limit → rotar a la siguiente key (mismo modelo)
-        if (status === 429 || msg.includes('429')) {
-          continue;
-        }
-
-        // 404 / "not found" / "no longer available" → abandonar este modelo, probar el siguiente
+        // 404 / modelo no disponible → probar el siguiente modelo
         if (
           status === 404 ||
           msg.includes('404') ||
           msg.includes('not found') ||
           msg.includes('no longer available') ||
-          msg.includes('is not supported') ||
-          msg.includes('ListModels')
+          msg.includes('is not supported')
         ) {
-          modelDisponible = false;
-          break; // salir del loop de keys, pasar al siguiente modelo
+          continue;
         }
 
-        // Cualquier otro error → propagar directamente
-        throw err;
+        // 429 rate limit o cualquier otro error → ir directo a OpenRouter
+        break;
       }
-    }
-
-    if (modelDisponible) {
-      // Si llegamos acá con modelDisponible=true pero sin retornar,
-      // significa que todas las keys dieron 429 para este modelo → probar siguiente
     }
   }
 
-  throw new Error(
-    'No se pudo conectar con Gemini: todos los modelos y keys fallaron. ' +
-    (ultimoError?.message || 'Intentá más tarde.')
-  );
+  // ── Fallback: OpenRouter ──
+  try {
+    console.warn('[IA] Gemini no disponible, usando OpenRouter como fallback.');
+    return await callOpenRouter(prompt);
+  } catch (openRouterError: any) {
+    throw new Error(
+      `IA no disponible. Gemini: ${ultimoErrorGemini?.message || 'sin key'}. ` +
+      `OpenRouter: ${openRouterError?.message || 'error desconocido'}.`
+    );
+  }
 }
 
+// ─── Embeddings: siempre Google (no hay equivalente gratuito en OpenRouter) ─
 /**
- * Genera embedding vectorial para búsqueda semántica (siempre usa la key primaria).
- * Gemini text-embedding-004 → 768 dimensiones.
+ * Genera embedding vectorial para búsqueda semántica.
+ * Gemini embedding-001 → 768 dimensiones.
  */
 export async function generarEmbedding(texto: string): Promise<number[]> {
   const key = process.env.GOOGLE_AI_API_KEY;
   if (!key) throw new Error('GOOGLE_AI_API_KEY no está configurada');
 
   const ai = new GoogleGenerativeAI(key);
-  // embedding-001 es compatible con v1beta (768 dims, igual que text-embedding-004)
-  const model = ai.getGenerativeModel({ model: 'embedding-001' });
-  const result = await model.embedContent(texto);
+  const embModel = ai.getGenerativeModel({ model: 'embedding-001' });
+  const result = await embModel.embedContent(texto);
   return result.embedding.values;
 }
