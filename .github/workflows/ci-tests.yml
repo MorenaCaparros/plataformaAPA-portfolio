@@ -40,7 +40,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY=test-anon-key-placeholder
           SUPABASE_SERVICE_ROLE_KEY=test-service-role-key-placeholder
           GOOGLE_AI_API_KEY=test-google-ai-key-placeholder
-          ENCRYPTION_KEY=dGVzdC1lbmNyeXB0aW9uLWtleS1mb3ItdGVzdGluZy1vbmx5AAAA
+          ENCRYPTION_KEY=test-encryption-key-placeholder-not-real
           EOF
 
       - name: Lint
@@ -104,7 +104,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY=test-anon-key-placeholder
           SUPABASE_SERVICE_ROLE_KEY=test-service-role-key-placeholder
           GOOGLE_AI_API_KEY=test-google-ai-key-placeholder
-          ENCRYPTION_KEY=dGVzdC1lbmNyeXB0aW9uLWtleS1mb3ItdGVzdGluZy1vbmx5AAAA
+          ENCRYPTION_KEY=test-encryption-key-placeholder-not-real
           EOF
 
       - name: Build Next.js
