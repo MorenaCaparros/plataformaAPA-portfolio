@@ -2,7 +2,7 @@
  * Paso 2: Google redirige aquí después de la autorización.
  * Intercambia el code por tokens y muestra el refresh_token.
  * 
- * El refresh_token se debe copiar a .env.local como GOOGLE_REFRESH_TOKEN=xxx
+ * El refresh_token se debe copiar a .env.local como GOOGLE_REFRESH_TOKEN (ver instrucciones en pantalla)
  * Esto se hace UNA SOLA VEZ.
  */
 
@@ -98,7 +98,7 @@ export async function GET(req: NextRequest) {
           <p>Copiá el siguiente valor y agregalo a tu archivo <code>.env.local</code>:</p>
           
           <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 12px; padding: 16px; margin: 20px 0;">
-            <p style="font-weight: bold; margin: 0 0 8px 0;">GOOGLE_REFRESH_TOKEN=</p>
+            <p style="font-weight: bold; margin: 0 0 8px 0;">Tu refresh token (copialo):</p>
             <input 
               type="text" 
               value="${tokens.refresh_token}" 
@@ -114,7 +114,7 @@ export async function GET(req: NextRequest) {
           <h3>📋 Pasos finales:</h3>
           <ol>
             <li>Abrir <code>.env.local</code></li>
-            <li>Agregar: <code>GOOGLE_REFRESH_TOKEN=${tokens.refresh_token}</code></li>
+            <li>Agregar la variable <code>GOOGLE_REFRESH_TOKEN</code> con el valor copiado arriba</li>
             <li>Reiniciar el servidor de Next.js</li>
             <li>¡Listo! Ya podés subir archivos a Google Drive</li>
           </ol>
