@@ -777,9 +777,9 @@ export default function BibliotecaDrivePage() {
               <div className="bg-white/80 rounded-2xl p-4 text-left max-w-lg mx-auto">
                 <p className="text-sm font-medium text-neutro-carbon mb-2">Variables de entorno requeridas:</p>
                 <code className="text-xs text-neutro-piedra block bg-neutro-lienzo p-3 rounded-xl">
-                  GOOGLE_SERVICE_ACCOUNT_EMAIL=...<br />
-                  GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=...<br />
-                  GOOGLE_DRIVE_FOLDER_ID=...
+                  GOOGLE_SERVICE_ACCOUNT_EMAIL<br />
+                  GOOGLE_DRIVE_FOLDER_ID<br />
+                  GOOGLE_DRIVE_CREDENTIALS (private key)
                 </code>
               </div>
             )}
