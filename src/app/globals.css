@@ -1,0 +1,338 @@
+/* Fuentes - Sistema Floating Organic */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
+/* Backups */
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Variables de color — Light mode (default)
+   ────────────────────────────────────────────────────────────────────────── */
+:root {
+  --background: #F9F7F3;        /* Lienzo (hueso/crema cálido) */
+  --foreground: #2D3436;        /* Carbón (texto principal) */
+
+  --surface:         255 255 255;   /* tarjetas (rgb sin #) */
+  --surface-opacity: 0.6;
+  --border-color:    255 255 255;
+  --border-opacity:  0.6;
+  --input-bg:        255 255 255;
+  --input-opacity:   0.8;
+  --text-primary:    #2D3436;
+  --text-secondary:  #636E72;
+  --muted-bg:        249 247 243;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Variables de color — Dark mode
+   Paleta: negro cálido + amarillo sol + verde crecimiento
+   ────────────────────────────────────────────────────────────────────────── */
+.dark {
+  --background: #1C1E1F;
+  --foreground: #F0EDE6;
+
+  --surface:         38 40 41;      /* #262829 */
+  --surface-opacity: 0.85;
+  --border-color:    255 255 255;
+  --border-opacity:  0.06;
+  --input-bg:        47 49 51;      /* #2F3133 */
+  --input-opacity:   1;
+  --text-primary:    #F0EDE6;
+  --text-secondary:  #8E9599;
+  --muted-bg:        38 40 41;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Base
+   ────────────────────────────────────────────────────────────────────────── */
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: 'Outfit', 'DM Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Quicksand', 'Nunito', sans-serif;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Dark mode — Overrides globales de componentes
+   Usamos selectores de atributo para pisar las clases blancas de Tailwind
+   ────────────────────────────────────────────────────────────────────────── */
+
+/* Fondo de página — quitar gradientes y fondos claros */
+.dark .min-h-screen {
+  background-color: #1C1E1F !important;
+  background-image: none !important;
+}
+
+/* Gradientes de página (.from-sol-50, .via-white, etc.) */
+.dark [class*="from-sol-50"],
+.dark [class*="from-white"],
+.dark [class*="via-white"] {
+  --tw-gradient-from: #1C1E1F !important;
+  --tw-gradient-via: #1C1E1F !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-via, transparent), var(--tw-gradient-to) !important;
+}
+
+/* Tarjetas / glassmorphism */
+.dark [class*="bg-white"] {
+  background-color: rgb(var(--surface) / var(--surface-opacity)) !important;
+  border-color: rgb(var(--border-color) / var(--border-opacity)) !important;
+}
+
+/* Nav sticky */
+.dark nav [class*="bg-white"] {
+  background-color: rgb(var(--surface) / 0.92) !important;
+  backdrop-filter: blur(24px);
+}
+
+/* Sidebar */
+.dark aside[class*="bg-white"] {
+  background-color: rgb(var(--surface) / 0.97) !important;
+}
+
+/* Texto carbón → texto claro */
+.dark .text-neutro-carbon,
+.dark [class*="text-neutro-carbon"] {
+  color: var(--text-primary) !important;
+}
+
+/* Texto piedra → texto muted dark */
+.dark .text-neutro-piedra,
+.dark [class*="text-neutro-piedra"] {
+  color: var(--text-secondary) !important;
+}
+
+/* Inputs y selects */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: rgb(var(--input-bg)) !important;
+  color: var(--text-primary) !important;
+  border-color: rgb(var(--border-color) / 0.12) !important;
+}
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #9CACB4 !important;
+  opacity: 0.85;
+}
+
+/* Labels */
+.dark label {
+  color: var(--text-secondary) !important;
+}
+
+/* Tablas */
+.dark table tbody tr:hover {
+  background-color: rgb(var(--surface) / 0.5) !important;
+}
+.dark thead tr {
+  border-bottom-color: rgb(var(--border-color) / 0.1) !important;
+}
+.dark tbody tr {
+  border-bottom-color: rgb(var(--border-color) / 0.06) !important;
+}
+
+/* Dividers */
+.dark [class*="border-white"] {
+  border-color: rgb(255 255 255 / 0.07) !important;
+}
+
+/* Overlay para modales */
+.dark .bg-neutro-carbon\/30 {
+  background-color: rgb(0 0 0 / 0.6) !important;
+}
+
+/* Badges / chips claros */
+.dark [class*="bg-gray-100"] {
+  background-color: rgb(var(--surface)) !important;
+  color: var(--text-secondary) !important;
+}
+.dark [class*="bg-neutro-lienzo"] {
+  background-color: rgb(var(--input-bg)) !important;
+}
+
+/* Sol (amarillo) — funciona muy bien en oscuro, solo ajustar fondo leve */
+.dark [class*="bg-sol-400\/10"],
+.dark [class*="bg-sol-400\/20"] {
+  background-color: rgb(242 201 76 / 0.08) !important;
+}
+.dark [class*="bg-sol-50"] {
+  background-color: rgb(242 201 76 / 0.07) !important;
+}
+.dark [class*="text-sol-700"] {
+  color: #F2C94C !important;
+}
+.dark [class*="text-sol-600"] {
+  color: #E6B800 !important;
+}
+
+/* Crecimiento (verde) — también funciona bien en oscuro */
+.dark [class*="bg-crecimiento-50"] {
+  background-color: rgb(164 198 57 / 0.08) !important;
+}
+.dark [class*="bg-crecimiento-100"] {
+  background-color: rgb(164 198 57 / 0.12) !important;
+}
+.dark [class*="text-crecimiento-700"] {
+  color: #A4C639 !important;
+}
+.dark [class*="text-crecimiento-600"] {
+  color: #A4C639 !important;
+}
+
+/* Impulso (rojo) */
+.dark [class*="bg-impulso-50"] {
+  background-color: rgb(230 57 70 / 0.08) !important;
+}
+
+/* Scrollbar dark */
+.dark ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #1C1E1F;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #383B3D;
+  border-radius: 3px;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #F2C94C40;
+}
+
+/* ── Gray scale (hardcoded en páginas sin tokens de marca) ───────────── */
+.dark [class*="bg-gray-50"],
+.dark [class*="bg-gray-100"] {
+  background-color: rgb(var(--surface)) !important;
+}
+.dark [class*="bg-gray-200"] {
+  background-color: rgb(var(--input-bg)) !important;
+}
+.dark [class*="border-gray-100"],
+.dark [class*="border-gray-200"] {
+  border-color: rgb(255 255 255 / 0.08) !important;
+}
+.dark [class*="text-gray-400"] { color: #6B7280 !important; }
+.dark [class*="text-gray-500"] { color: #8E9599 !important; }
+.dark [class*="text-gray-600"] { color: #9CACB4 !important; }
+.dark [class*="text-gray-700"] { color: #C5CDD3 !important; }
+.dark [class*="text-gray-800"] { color: #DDE3E8 !important; }
+.dark [class*="text-gray-900"] { color: #F0EDE6 !important; }
+
+/* Hover gray — se aplica con specificity vía :hover */
+.dark [class*="hover:bg-gray-50"]:hover,
+.dark [class*="hover:bg-gray-100"]:hover {
+  background-color: rgb(var(--surface) / 0.8) !important;
+}
+
+/* ── Red (alertas, mensajes de error, evalución pendiente) ───────────── */
+.dark [class*="bg-red-50"] {
+  background-color: rgb(230 57 70 / 0.12) !important;
+}
+.dark [class*="bg-red-100"] {
+  background-color: rgb(230 57 70 / 0.16) !important;
+}
+.dark [class*="border-red-300"],
+.dark [class*="border-red-200"] {
+  border-color: rgb(230 57 70 / 0.3) !important;
+}
+.dark [class*="text-red-800"] { color: #F87171 !important; }
+.dark [class*="text-red-700"] { color: #FCA5A5 !important; }
+.dark [class*="text-red-600"] { color: #FECACA !important; }
+.dark [class*="text-red-500"] { color: #F87171 !important; }
+
+/* ── Orange (Nociones Matemáticas, etc.) ─────────────────────────────── */
+.dark [class*="bg-orange-50"],
+.dark [class*="bg-orange-100"] {
+  background-color: rgb(249 115 22 / 0.10) !important;
+}
+.dark [class*="border-orange-200"],
+.dark [class*="border-orange-300"] {
+  border-color: rgb(249 115 22 / 0.25) !important;
+}
+.dark [class*="text-orange-800"] { color: #FDBA74 !important; }
+.dark [class*="text-orange-700"] { color: #FED7AA !important; }
+
+/* ── Green (Tailwind green, no es crecimiento) ───────────────────────── */
+.dark [class*="bg-green-100"] {
+  background-color: rgb(34 197 94 / 0.10) !important;
+}
+.dark [class*="text-green-800"] { color: #86EFAC !important; }
+.dark [class*="text-green-700"] { color: #BBF7D0 !important; }
+
+/* ── Purple ──────────────────────────────────────────────────────────── */
+.dark [class*="bg-purple-100"] {
+  background-color: rgb(168 85 247 / 0.12) !important;
+}
+.dark [class*="hover:bg-purple-100"]:hover {
+  background-color: rgb(168 85 247 / 0.18) !important;
+}
+.dark [class*="text-purple-800"] { color: #D8B4FE !important; }
+.dark [class*="text-purple-700"] { color: #E9D5FF !important; }
+.dark [class*="text-purple-600"] { color: #C084FC !important; }
+
+/* ── Teal (Métricas Generales nav card icon) ─────────────────────────── */
+.dark [class*="bg-teal-50"] {
+  background-color: rgb(20 184 166 / 0.08) !important;
+}
+.dark [class*="bg-teal-100"] {
+  background-color: rgb(20 184 166 / 0.12) !important;
+}
+
+/* ── Impulso (rojo de marca) — aclarar texto en dark para contraste ─── */
+.dark [class*="text-impulso-700"] { color: #F87171 !important; }
+.dark [class*="text-impulso-600"] { color: #FCA5A5 !important; }
+.dark [class*="text-impulso-500"] { color: #F87171 !important; }
+
+/* ── Sol-100, crecimiento-100 (badges de edad, escolarizado, etc.) ───── */
+.dark [class*="bg-sol-100"] {
+  background-color: rgb(242 201 76 / 0.10) !important;
+}
+.dark [class*="bg-crecimiento-100"] {
+  background-color: rgb(164 198 57 / 0.10) !important;
+}
+.dark [class*="text-crecimiento-800"] { color: #A4C639 !important; }
+
+/* ── bg-neutro-nube (usar como superficie oscura) ────────────────────── */
+.dark [class*="bg-neutro-nube"] {
+  background-color: rgb(var(--input-bg)) !important;
+}
+
+/* ── Divide lines ────────────────────────────────────────────────────── */
+.dark .divide-white > * + * {
+  border-color: rgb(255 255 255 / 0.06) !important;
+}
+.dark [class*="divide-gray"] > * + * {
+  border-color: rgb(255 255 255 / 0.06) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   Utilidades
+   ────────────────────────────────────────────────────────────────────────── */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Animación delay para blobs */
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+}

@@ -1,0 +1,96 @@
+# ==================================
+# 🤖 Agentes, IA e Instrucciones (ignorar siempre)
+# ==================================
+.agent/
+.agents/
+skills-lock.json
+.github/instructions/
+copilot-instructions.md
+
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# testing
+coverage/
+
+# next.js
+.next/
+out/
+build/
+dist/
+
+# production
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# ==================================
+# ⚠️ SEGURIDAD CRÍTICA - Variables de Entorno
+# ==================================
+# NUNCA subir claves secretas, API keys o credenciales
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+.env*.local
+# PERMITIR solo el template sin valores reales
+!.env.example
+
+# vercel / netlify
+.vercel
+.netlify
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+Thumbs.db
+
+# Supabase
+.branches
+.temp
+
+# Archivos SQL (no subir migraciones sensibles)
+*.sql
+supabase/migrations/*.sql
+
+# ==================================
+# 📝 Documentación interna (no subir)
+# ==================================
+# Archivos de tracking y notas de trabajo
+TAREAS-PENDIENTES.md
+PROXIMOS-PASOS.md
+NOTAS-*.md
+RESUMEN-*.md
+INSTRUCCIONES-*.md
+ESTADO-*.md
+CHECKLIST_APLICACION.md
+TESTING_PENDIENTE.md
+gemini.md
+# IDE/Agent folders
+.claude/
+.trae/

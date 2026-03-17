@@ -1,0 +1,152 @@
+# ============================================================
+# CI — Tests automáticos para Plataforma APA
+# Se ejecuta en cada push a "test" y en PRs hacia "main"
+# ============================================================
+name: Tests
+
+on:
+  push:
+    branches:
+      - test
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  # ──────────────────────────────────────────────────────────
+  # JOB 1: Unit + Component + API tests (Vitest)
+  # ──────────────────────────────────────────────────────────
+  unit-tests:
+    name: Unit & Component Tests (Vitest)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci --legacy-peer-deps
+
+      - name: Crear .env.test (variables de prueba)
+        run: |
+          cat > .env.test << 'EOF'
+          NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=test-anon-key-placeholder
+          SUPABASE_SERVICE_ROLE_KEY=test-service-role-key-placeholder
+          GOOGLE_AI_API_KEY=test-google-ai-key-placeholder
+          ENCRYPTION_KEY=dGVzdC1lbmNyeXB0aW9uLWtleS1mb3ItdGVzdGluZy1vbmx5AAAA
+          EOF
+
+      - name: Lint
+        run: npx next lint --no-cache || true
+        # Warnings no bloquean CI; errores se loguean para visibilidad
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Tests unitarios
+        run: npm run test:unit
+        env:
+          NODE_ENV: test
+
+      - name: Tests de componentes
+        run: npm run test:components
+        env:
+          NODE_ENV: test
+
+      - name: Tests de API routes
+        run: npm run test:api
+        env:
+          NODE_ENV: test
+          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: test-anon-key-placeholder
+          SUPABASE_SERVICE_ROLE_KEY: test-service-role-key-placeholder
+
+      - name: Coverage completa
+        run: npm run test:coverage
+        env:
+          NODE_ENV: test
+          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: test-anon-key-placeholder
+          SUPABASE_SERVICE_ROLE_KEY: test-service-role-key-placeholder
+
+  # ──────────────────────────────────────────────────────────
+  # JOB 2: Build check (verifica que el proyecto compila)
+  # ──────────────────────────────────────────────────────────
+  build-check:
+    name: Build Check
+    runs-on: ubuntu-latest
+    needs: unit-tests
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Instalar dependencias
+        run: npm ci --legacy-peer-deps
+
+      - name: Crear .env para build
+        run: |
+          cat > .env.local << 'EOF'
+          NEXT_PUBLIC_SUPABASE_URL=http://localhost:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=test-anon-key-placeholder
+          SUPABASE_SERVICE_ROLE_KEY=test-service-role-key-placeholder
+          GOOGLE_AI_API_KEY=test-google-ai-key-placeholder
+          ENCRYPTION_KEY=dGVzdC1lbmNyeXB0aW9uLWtleS1mb3ItdGVzdGluZy1vbmx5AAAA
+          EOF
+
+      - name: Build Next.js
+        run: npm run build
+
+  # ──────────────────────────────────────────────────────────
+  # JOB 3: Notificación de resultado (solo para PRs)
+  # ──────────────────────────────────────────────────────────
+  notify:
+    name: Resultado del pipeline
+    runs-on: ubuntu-latest
+    needs: [unit-tests, build-check]
+    if: always() && github.event_name == 'pull_request'
+
+    steps:
+      - name: Comentar resultado en el PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const unitResult = '${{ needs.unit-tests.result }}';
+            const buildResult = '${{ needs.build-check.result }}';
+            const allGreen = unitResult === 'success' && buildResult === 'success';
+
+            const emoji = allGreen ? '✅' : '❌';
+            const status = allGreen ? 'todos los tests pasaron' : 'hay tests o build fallidos';
+
+            const body = [
+              `## ${emoji} Pipeline de Tests — ${status}`,
+              '',
+              '| Job | Resultado |',
+              '|-----|-----------|',
+              `| Unit & Component Tests | ${unitResult === 'success' ? '✅' : '❌'} ${unitResult} |`,
+              `| Build Check | ${buildResult === 'success' ? '✅' : '❌'} ${buildResult} |`,
+              '',
+              allGreen
+                ? '_Listo para hacer merge_ 🚀'
+                : '_Revisá los logs antes de mergear_ ⚠️',
+            ].join('\n');
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
