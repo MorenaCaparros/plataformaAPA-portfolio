@@ -180,6 +180,8 @@ export default function NinoPerfilPage() {
   const [showEscuelaModal, setShowEscuelaModal] = useState(false);
   const [nuevaEscuelaNombre, setNuevaEscuelaNombre] = useState('');
   const [creandoEscuela, setCreandoEscuela] = useState(false);
+  // Quick zone selector (view mode)
+  const [guardandoQuickZona, setGuardandoQuickZona] = useState(false);
 
   const isVoluntario = perfil?.rol === 'voluntario';
   const tieneAccesoCompleto = perfil?.rol && ['psicopedagogia', 'director', 'admin', 'coordinador', 'trabajador_social'].includes(perfil.rol);
@@ -231,7 +233,19 @@ export default function NinoPerfilPage() {
 
       setNino(ninoCompleto);
 
-      // Init editable fields from nino data
+      // Load all zones for quick zone selector (puedeEditar users)
+      if (tieneAccesoCompleto || perfil?.rol === 'equipo_profesional') {
+        try {
+          const { data: zonasData } = await supabase
+            .from('zonas')
+            .select('id, nombre')
+            .eq('activa', true)
+            .order('nombre', { ascending: true });
+          if (zonasData) setZonas(zonasData);
+        } catch (e) {
+          // non-critical
+        }
+      }
       setEditPermanencia(ninoCompleto.activo);
       setEditAnoPermanencia(new Date().getFullYear());
       // 2a. Load salud_ninos (non-critical) — terapia + comentarios
@@ -756,6 +770,29 @@ export default function NinoPerfilPage() {
 
   // ─── Crear nueva zona / escuela desde modal ───────────────
 
+  // ─── Quick zone change (view mode) ───────────────────────
+  const handleQuickZonaChange = async (zonaId: string) => {
+    if (!nino) return;
+    setGuardandoQuickZona(true);
+    try {
+      const { error } = await supabase
+        .from('ninos')
+        .update({ zona_id: zonaId || null })
+        .eq('id', ninoId);
+      if (!error) {
+        const zonaObj = zonas.find(z => z.id === zonaId) ?? null;
+        setNino(prev => prev
+          ? { ...prev, zona_id: zonaId || null, zonas: zonaObj ? { id: zonaObj.id, nombre: zonaObj.nombre } : null }
+          : prev
+        );
+      }
+    } finally {
+      setGuardandoQuickZona(false);
+    }
+  };
+
+  // ─── Crear nueva zona / escuela desde modal ───────────────
+
   const handleCrearZona = async () => {
     const nombre = nuevaZonaNombre.trim();
     if (!nombre) return;
@@ -1029,7 +1066,7 @@ export default function NinoPerfilPage() {
                   <button
                     onClick={() => fotoInputRef.current?.click()}
                     disabled={subiendoFoto}
-                    className="absolute -bottom-1 -right-1 w-8 h-8 bg-crecimiento-500 hover:bg-crecimiento-600 text-white rounded-full flex items-center justify-center shadow-md transition-colors"
+                    className="absolute -bottom-1 -right-1 w-11 h-11 bg-crecimiento-500 hover:bg-crecimiento-600 text-white rounded-full flex items-center justify-center shadow-md transition-colors"
                     title="Cambiar foto"
                   >
                     {subiendoFoto ? (
@@ -1082,10 +1119,31 @@ export default function NinoPerfilPage() {
                     {nino.grado_escolar || 'Escolarizado'}
                   </span>
                 )}
-                {nino.zonas && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-impulso-100 text-impulso-700 font-medium">
+                {nino.zonas && !puedeEditar && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-impulso-100 text-impulso-700 font-medium">
+                    <MapPin className="w-3 h-3" />
                     {nino.zonas.nombre}
                   </span>
+                )}
+                {puedeEditar && zonas.length > 0 && (
+                  <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-impulso-50 border border-impulso-200 text-impulso-700 font-medium cursor-pointer hover:bg-impulso-100 transition-colors">
+                    <MapPin className="w-3 h-3 text-impulso-500 flex-shrink-0" />
+                    <select
+                      value={nino.zona_id || ''}
+                      onChange={(e) => handleQuickZonaChange(e.target.value)}
+                      disabled={guardandoQuickZona}
+                      className="text-sm bg-transparent border-none outline-none text-impulso-700 font-medium cursor-pointer disabled:opacity-50 max-w-[140px]"
+                      title="Cambiar zona"
+                    >
+                      <option value="">Sin zona</option>
+                      {zonas.map(z => (
+                        <option key={z.id} value={z.id}>{z.nombre}</option>
+                      ))}
+                    </select>
+                    {guardandoQuickZona && (
+                      <div className="w-3 h-3 animate-spin rounded-full border-2 border-impulso-300 border-t-impulso-600 flex-shrink-0" />
+                    )}
+                  </label>
                 )}
                 {/* Permanencia badge */}
                 <span

@@ -52,6 +52,7 @@ function UsuariosPageContent() {
   const [busqueda, setBusqueda] = useState('');
   const [vistaCards, setVistaCards] = useState(true);
   const [perfilExpandido, setPerfilExpandido] = useState<string | null>(null);
+  const [zonas, setZonas] = useState<{id: string; nombre: string}[]>([]);
   // Map de voluntario_id → true si necesita capacitación
   const [capPendiente, setCapPendiente] = useState<Record<string, boolean>>({});
 
@@ -84,6 +85,14 @@ function UsuariosPageContent() {
       if (!response.ok) throw new Error('Error al cargar usuarios');
       const { usuarios: usuariosData } = await response.json();
       setUsuarios(usuariosData);
+
+      // Cargar todas las zonas disponibles
+      supabase
+        .from('zonas')
+        .select('id, nombre')
+        .eq('activa', true)
+        .order('nombre', { ascending: true })
+        .then(({ data }: { data: {id: string; nombre: string}[] | null }) => { if (data) setZonas(data); });
 
       // Cargar estado de capacitaciones para voluntarios
       const voluntariosIds = (usuariosData as Usuario[]).filter(u => u.rol === 'voluntario').map(u => u.id);
@@ -282,10 +291,8 @@ function UsuariosPageContent() {
               className="px-3 py-2.5 bg-white/80 border border-white/60 rounded-2xl focus:ring-2 focus:ring-crecimiento-400 text-neutro-carbon font-outfit text-sm min-h-[44px]"
             >
               <option value="todas">Todos los equipos</option>
-              {[...new Set(usuarios.map(u => u.zona_nombre).filter(Boolean))].map((zona) => (
-                <option key={zona} value={usuarios.find(u => u.zona_nombre === zona)?.zona_id || ''}>
-                  {zona}
-                </option>
+              {zonas.map(z => (
+                <option key={z.id} value={z.id}>{z.nombre}</option>
               ))}
             </select>
 
