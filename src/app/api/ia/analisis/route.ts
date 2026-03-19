@@ -33,9 +33,9 @@ export async function POST(request: Request) {
       .eq('id', user.id)
       .single();
 
-    if (!['psicopedagogia', 'director', 'coordinador'].includes(perfil?.rol || '')) {
+    if (!['psicopedagogia', 'director', 'coordinador', 'equipo_profesional'].includes(perfil?.rol || '')) {
       return NextResponse.json({ 
-        error: 'No autorizado - requiere rol psicopedagogia, coordinador o director' 
+        error: 'No autorizado - requiere rol psicopedagogia, coordinador, equipo_profesional o director' 
       }, { status: 403 });
     }
 
