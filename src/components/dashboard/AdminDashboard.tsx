@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase/client';
-import { FileText, UserCheck, Building2, BookOpen, Settings, Baby, BarChart3, Timer, Activity } from 'lucide-react';
+import { FileText, UserCheck, Building2, BookOpen, Settings, Baby, BarChart3, Timer, Activity, ShieldCheck } from 'lucide-react';
 import DashboardNavCard from './ui/DashboardNavCard';
 import DashboardMetricCard, { DashboardMetricCardSkeleton } from './ui/DashboardMetricCard';
 import DashboardHeader from './ui/DashboardHeader';
@@ -252,6 +252,7 @@ export default function AdminDashboard() {
         <DashboardNavCard href="/dashboard/biblioteca" icon={BookOpen} title="Biblioteca" description="Documentos psicopedagógicos y sistema RAG" colorClass="sol" />
         <DashboardNavCard href="/dashboard/configuracion" icon={Settings} title="Configuración" description="Ajustes del sistema y preferencias" colorClass="neutral" />
         <DashboardNavCard href="/dashboard/metricas" icon={BarChart3} title="Métricas Generales" description="Estadísticas globales de toda la plataforma" colorClass="teal" />
+        <DashboardNavCard href="/dashboard/audit-log" icon={ShieldCheck} title="Log de Auditoría" description="Quién cambió qué y cuándo en el sistema" colorClass="neutral" />
       </div>
     </div>
   );
