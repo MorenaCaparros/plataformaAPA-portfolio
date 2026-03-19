@@ -14,8 +14,25 @@ type Perfil = {
   nombre: string;
   apellido: string;
   created_at: string;
+  ultima_conexion: string | null;
   email?: string;
 };
+
+function formatUltimaConexion(fecha: string | null): string {
+  if (!fecha) return 'Nunca';
+  const ahora = new Date();
+  const conexion = new Date(fecha);
+  const diffMs = ahora.getTime() - conexion.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHoras = Math.floor(diffMin / 60);
+  const diffDias = Math.floor(diffHoras / 24);
+  if (diffMin < 1) return 'Ahora mismo';
+  if (diffMin < 60) return `hace ${diffMin} min`;
+  if (diffHoras < 24) return `hace ${diffHoras}h`;
+  if (diffDias === 1) return 'ayer';
+  if (diffDias < 7) return `hace ${diffDias} días`;
+  return conexion.toLocaleDateString('es-AR');
+}
 
 export default function UsuariosPage() {
   const { perfil } = useAuth();
@@ -215,6 +232,9 @@ export default function UsuariosPage() {
                       Fecha Creación
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Última Conexión
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Acciones
                     </th>
                   </tr>
@@ -257,6 +277,17 @@ export default function UsuariosPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         {new Date(usuario.created_at).toLocaleDateString('es-AR')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <span className={`${
+                          !usuario.ultima_conexion
+                            ? 'text-gray-400'
+                            : new Date().getTime() - new Date(usuario.ultima_conexion).getTime() < 7 * 24 * 60 * 60 * 1000
+                            ? 'text-crecimiento-600 font-medium'
+                            : 'text-gray-500'
+                        }`}>
+                          {formatUltimaConexion(usuario.ultima_conexion)}
+                        </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         {editando === usuario.id ? (
