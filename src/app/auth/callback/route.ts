@@ -3,6 +3,9 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/admin';
 
+// 400 días — consistente con middleware y client.ts
+const SESSION_MAX_AGE = 60 * 60 * 24 * 400;
+
 /**
  * Parsea el full_name de Google en nombre + apellido.
  * Ejemplo: "Juan Carlos Pérez"  →  { nombre: "Juan", apellido: "Carlos Pérez" }
@@ -43,7 +46,8 @@ export async function GET(request: NextRequest) {
             return request.cookies.get(name)?.value;
           },
           set(name: string, value: string, options: CookieOptions) {
-            redirectResponse.cookies.set({ name, value, ...options });
+            // Forzar maxAge persistente — igual que el middleware
+            redirectResponse.cookies.set({ name, value, ...options, maxAge: SESSION_MAX_AGE });
           },
           remove(name: string, options: CookieOptions) {
             redirectResponse.cookies.set({ name, value: '', ...options });

@@ -17,6 +17,7 @@ export default function LoginPage() {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [demoError, setDemoError] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +64,7 @@ export default function LoginPage() {
 
   const handleDemoLogin = async (demoEmail: string, demoPassword: string, label: string) => {
     setDemoLoading(label);
+    setDemoError(null);
     setError(null);
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -72,7 +74,7 @@ export default function LoginPage() {
       if (error) throw error;
       if (data.user) window.location.href = '/dashboard';
     } catch (error: any) {
-      setError('No se pudo acceder al usuario demo. Verificá que esté creado en Supabase.');
+      setDemoError('No se pudo acceder al usuario demo. Verificá que esté creado en Supabase.');
     } finally {
       setDemoLoading(null);
     }
@@ -88,7 +90,7 @@ export default function LoginPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sol-400/10 rounded-full blur-3xl animate-blob animation-delay-4000" />
       </div>
 
-      <div className="max-w-md w-full space-y-8 relative z-10">
+      <div className="max-w-md w-full space-y-6 relative z-10">
         {/* Logo y Header */}
         <div className="text-center space-y-4">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-sol-400 to-crecimiento-400 shadow-glow-sol mb-4">
@@ -108,7 +110,55 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Card de Login */}
+        {/* Acceso rápido demo — DESTACADO ARRIBA */}
+        <div className="bg-gradient-to-br from-sol-400/20 to-crecimiento-400/10 backdrop-blur-lg rounded-3xl border-2 border-sol-400/40 shadow-glow-sol p-6">
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <span className="text-lg">🚀</span>
+            <p className="text-center text-base font-bold text-neutro-carbon">Acceso rápido — modo demo</p>
+          </div>
+          <p className="text-center text-xs text-neutro-piedra mb-4">Sin registrarse, explorá cada rol</p>
+          <div className="flex flex-col gap-2">
+            {DEMO_USERS.map((u) => (
+              <button
+                key={u.label}
+                type="button"
+                disabled={!!demoLoading}
+                onClick={() => handleDemoLogin(u.email, u.password, u.label)}
+                className="w-full flex items-center justify-between gap-3 px-4 py-3.5 rounded-2xl bg-white/70 border border-sol-400/30 hover:bg-white hover:border-crecimiento-400/50 hover:shadow-md transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed min-h-[52px]"
+              >
+                <span className="flex items-center gap-2 text-sm font-semibold text-neutro-carbon">
+                  <span className="text-base">{u.emoji}</span>
+                  {u.label}
+                </span>
+                {demoLoading === u.label ? (
+                  <svg className="animate-spin h-4 w-4 text-crecimiento-500" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                ) : (
+                  <span className="text-xs text-neutro-piedra font-mono bg-neutro-lienzo/80 px-2 py-0.5 rounded-lg">{u.email}</span>
+                )}
+              </button>
+            ))}
+          </div>
+          {demoError && (
+            <div className="mt-3 bg-impulso-50 border border-impulso-200 rounded-2xl p-3 animate-in fade-in slide-in-from-top-2">
+              <p className="text-xs text-impulso-700 font-medium text-center">{demoError}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Separador */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-neutro-piedra/20" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-neutro-lienzo px-3 py-1 rounded-full text-neutro-piedra font-medium">
+              o iniciá sesión con tu cuenta
+            </span>
+          </div>
+        </div>
         <div className="bg-white/60 backdrop-blur-lg rounded-3xl border border-sol-400/20 shadow-glow-sol p-8">
           {/* Botón de Google */}
           <button
@@ -235,36 +285,6 @@ export default function LoginPage() {
             >
               Registrate aquí
             </Link>
-          </div>
-        </div>
-
-        {/* Acceso rápido demo */}
-        <div className="bg-white/60 backdrop-blur-lg rounded-3xl border border-sol-400/20 shadow-glow-sol p-6">
-          <p className="text-center text-sm font-semibold text-neutro-carbon mb-1">🚀 Acceso rápido — modo demo</p>
-          <p className="text-center text-xs text-neutro-piedra mb-4">Sin registrarse, explorá cada rol</p>
-          <div className="flex flex-col gap-2">
-            {DEMO_USERS.map((u) => (
-              <button
-                key={u.label}
-                type="button"
-                disabled={!!demoLoading}
-                onClick={() => handleDemoLogin(u.email, u.password, u.label)}
-                className="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl bg-sol-400/10 border border-sol-400/20 hover:bg-sol-400/20 transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed min-h-[48px]"
-              >
-                <span className="flex items-center gap-2 text-sm font-medium text-neutro-carbon">
-                  <span>{u.emoji}</span>
-                  {u.label}
-                </span>
-                {demoLoading === u.label ? (
-                  <svg className="animate-spin h-4 w-4 text-crecimiento-500" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                  </svg>
-                ) : (
-                  <span className="text-xs text-neutro-piedra font-mono">{u.email}</span>
-                )}
-              </button>
-            ))}
           </div>
         </div>
 

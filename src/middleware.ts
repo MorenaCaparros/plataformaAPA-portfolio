@@ -21,7 +21,9 @@ export async function middleware(request: NextRequest) {
         },
         set(name: string, value: string, options: CookieOptions) {
           // Asegurar que las cookies de sesión sean persistentes (no solo de sesión del navegador)
-          const persistentOptions = { maxAge: SESSION_MAX_AGE, ...options };
+          // IMPORTANTE: ...options va PRIMERO para que maxAge: SESSION_MAX_AGE siempre gane
+          // (Supabase envía maxAge: 3600 en options; si lo dejamos último, pisa el nuestro)
+          const persistentOptions = { ...options, maxAge: SESSION_MAX_AGE };
           request.cookies.set({
             name,
             value,
