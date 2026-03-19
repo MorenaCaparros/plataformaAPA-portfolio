@@ -117,6 +117,9 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const pregunta: string = body.pregunta;
+    const tipo = body.tipo as string | undefined;
+    const tagsFilter: string[] = Array.isArray(body.tags) ? body.tags : [];
+
     // Acepta ninoId (legacy, un nino) o ninoIds (nuevo, multiples ninos)
     const ninoIds: string[] = Array.isArray(body.ninoIds) && body.ninoIds.length > 0
       ? body.ninoIds
@@ -127,6 +130,79 @@ export async function POST(request: NextRequest) {
     if (!pregunta?.trim()) {
       return NextResponse.json({ error: 'Pregunta requerida' }, { status: 400 });
     }
+
+    // ── Modo Biblioteca: consulta libre sobre la biblioteca RAG, sin nino ──────
+    if (tipo === 'biblioteca') {
+      try {
+        const queryEmbedding = await generarEmbedding(pregunta);
+
+        // Filtrar documentos por tags si se especificaron
+        let filterIds: string[] | null = null;
+        let totalDocumentos = 0;
+
+        if (tagsFilter.length > 0) {
+          const { data: docsConTags } = await supabase
+            .from('documentos')
+            .select('id')
+            .overlaps('tags', tagsFilter);
+          filterIds = (docsConTags || []).map((d: any) => d.id);
+          totalDocumentos = filterIds.length;
+        } else {
+          const { count } = await supabase
+            .from('documentos')
+            .select('*', { count: 'exact', head: true });
+          totalDocumentos = count || 0;
+        }
+
+        const { data: chunks } = await supabase.rpc('match_documents', {
+          query_embedding: queryEmbedding,
+          match_threshold: 0.55,
+          match_count: 8,
+          filter_documento_ids: filterIds,
+        });
+
+        let fragmentosBibliografia = 'No hay documentos cargados en la biblioteca aún.';
+        let fuentesUsadas: { titulo: string; autor: string }[] = [];
+
+        if (chunks && chunks.length > 0) {
+          fragmentosBibliografia = chunks.map((chunk: any, i: number) =>
+            `--- Fragmento ${i + 1} ---\nDocumento: ${chunk.documento.titulo}\nAutor: ${chunk.documento.autor}\n\n${chunk.texto}`
+          ).join('\n\n');
+          fuentesUsadas = [...new Map(chunks.map((c: any) => [c.documento.titulo, { titulo: c.documento.titulo, autor: c.documento.autor }])).values()];
+        }
+
+        const promptFinal = PROMPT_CHAT_BIBLIOTECA
+          + `\n\n**FRAGMENTOS RELEVANTES DE LA BIBLIOTECA:**\n${fragmentosBibliografia}`
+          + `\n\n**PREGUNTA:**\n${pregunta.trim()}`;
+
+        const respuesta = await callGeminiWithKeyRotation(promptFinal);
+
+        await supabase.from('historial_consultas_ia').insert({
+          usuario_id: user.id,
+          modo: 'biblioteca',
+          nino_id: null,
+          pregunta: pregunta.trim(),
+          respuesta,
+          fuentes: fuentesUsadas.length > 0 ? fuentesUsadas : null,
+          tags_usados: tagsFilter.length > 0 ? tagsFilter : null,
+          tokens_aprox: Math.round((promptFinal.length + respuesta.length) / 4),
+        });
+
+        return NextResponse.json({
+          respuesta,
+          fuentes: fuentesUsadas,
+          totalDocumentos,
+          filtradoPorTags: tagsFilter.length > 0 ? tagsFilter : null,
+        });
+      } catch (error: any) {
+        console.error('Error en modo biblioteca:', error);
+        return NextResponse.json(
+          { error: error.message || 'Error al consultar la biblioteca' },
+          { status: 500 }
+        );
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     if (ninoIds.length === 0) {
       return NextResponse.json(

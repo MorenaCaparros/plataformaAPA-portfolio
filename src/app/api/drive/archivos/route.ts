@@ -31,9 +31,11 @@ export async function GET(request: NextRequest) {
 
     const rol = perfil?.rol || 'voluntario';
 
-    // Obtener folderId de query params (opcional)
+    // Obtener parámetros de query
     const { searchParams } = new URL(request.url);
     const folderId = searchParams.get('folderId') || undefined;
+    // Filtro por tag: ?tag=lectoescritura
+    const tagFilter = searchParams.get('tag') || '';
 
     // Verificar que las credenciales estén configuradas
     const hasOAuth2 = (process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_OAUTH_CLIENT_ID) &&
@@ -70,10 +72,20 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    // Filtrar archivos por tag si se especificó
+    const archivosFiltrados = tagFilter
+      ? archivos.filter(f => {
+          const fileTags = f.appProperties?.tags
+            ? f.appProperties.tags.split(',').map((t: string) => t.trim()).filter(Boolean)
+            : [];
+          return fileTags.includes(tagFilter);
+        })
+      : archivos;
+
     return NextResponse.json({
       success: true,
       configured: true,
-      archivos,
+      archivos: archivosFiltrados,
       carpetas,
       rol,
       folderId: folderId || process.env.GOOGLE_DRIVE_FOLDER_ID
