@@ -306,6 +306,26 @@ export default function AdminPage() {
             </div>
           </Link>
 
+          {/* Tracking de Capacitaciones */}
+          <Link
+            href="/dashboard/admin/capacitaciones"
+            className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition group"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900 group-hover:text-impulso-600 transition">
+                Capacitaciones
+              </h2>
+              <span className="text-3xl">🎓</span>
+            </div>
+            <p className="text-gray-600 text-sm mb-4">
+              Ver qué voluntarios completaron cada capacitación y quiénes tienen pendientes.
+            </p>
+            <div className="flex items-center text-impulso-600 font-medium text-sm">
+              Ver tracking
+              <span className="ml-2 group-hover:translate-x-1 transition">→</span>
+            </div>
+          </Link>
+
           {/* Vista de Todos los Datos */}
           <div className="bg-gradient-to-br from-sol-50 to-crecimiento-50 rounded-lg shadow-sm p-6 border-2 border-sol-200">
             <div className="flex items-center justify-between mb-4">
