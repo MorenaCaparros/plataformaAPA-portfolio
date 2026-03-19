@@ -247,7 +247,7 @@ export default function NuevoPlanPage() {
                 <button
                   type="button"
                   onClick={() => setAreaFiltro('todos')}
-                  className={`px-3 py-1.5 rounded-full text-xs font-semibold font-outfit transition-colors min-h-[32px] ${
+                  className={`px-3 py-1.5 rounded-full text-xs font-semibold font-outfit transition-colors min-h-[44px] ${
                     areaFiltro === 'todos'
                       ? 'bg-impulso-500 text-white'
                       : 'bg-impulso-100 text-impulso-700 hover:bg-impulso-200'
@@ -260,7 +260,7 @@ export default function NuevoPlanPage() {
                     key={a.value}
                     type="button"
                     onClick={() => setAreaFiltro(a.value)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold font-outfit transition-colors min-h-[32px] ${
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold font-outfit transition-colors min-h-[44px] ${
                       areaFiltro === a.value
                         ? 'bg-impulso-500 text-white'
                         : 'bg-impulso-100 text-impulso-700 hover:bg-impulso-200'

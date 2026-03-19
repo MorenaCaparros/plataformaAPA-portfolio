@@ -259,7 +259,7 @@ export default function ConsentimientoGrabacionModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-neutro-piedra hover:text-neutro-carbon transition-colors rounded-xl hover:bg-gray-100"
+            className="p-3 min-h-[44px] min-w-[44px] flex items-center justify-center text-neutro-piedra hover:text-neutro-carbon transition-colors rounded-xl hover:bg-gray-100"
           >
             <X size={18} />
           </button>

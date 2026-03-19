@@ -761,7 +761,7 @@ export default function BancoPreguntasPage() {
           <span className="text-xs text-neutro-piedra font-outfit">Correcta:</span>
           {[1, 2, 3, 4, 5].map(v => (
             <button key={v} type="button" onClick={() => setEditRespuestaCorrecta(String(v))}
-              className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${editRespuestaCorrecta === String(v) ? 'bg-sol-400 text-white' : 'bg-neutro-nube text-neutro-piedra'}`}>
+              className={`w-11 h-11 rounded-lg text-xs font-bold transition-all ${editRespuestaCorrecta === String(v) ? 'bg-sol-400 text-white' : 'bg-neutro-nube text-neutro-piedra'}`}>
               {v}
             </button>
           ))}

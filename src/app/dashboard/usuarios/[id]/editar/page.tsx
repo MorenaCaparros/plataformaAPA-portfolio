@@ -258,7 +258,7 @@ export default function EditarUsuarioPage() {
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploadingFoto}
-                  className="absolute -bottom-1 -right-1 w-8 h-8 bg-crecimiento-500 hover:bg-crecimiento-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95 disabled:opacity-50"
+                  className="absolute -bottom-1 -right-1 w-11 h-11 bg-crecimiento-500 hover:bg-crecimiento-600 text-white rounded-full flex items-center justify-center shadow-lg transition-all active:scale-95 disabled:opacity-50"
                 >
                   {uploadingFoto ? (
                     <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />

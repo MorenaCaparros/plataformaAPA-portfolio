@@ -433,7 +433,7 @@ function MisNinosPageContent() {
                         value={nino.zonas?.id || ''}
                         onChange={(e) => handleCambiarZona(nino.id, e.target.value)}
                         disabled={guardandoZonaAsign === nino.id}
-                        className="flex-1 text-sm px-2 py-1.5 bg-white/70 border border-neutro-piedra/20 rounded-xl font-outfit text-neutro-carbon focus:ring-2 focus:ring-crecimiento-300 outline-none disabled:opacity-50 min-h-[36px] cursor-pointer"
+                        className="flex-1 text-sm px-2 py-1.5 bg-white/70 border border-neutro-piedra/20 rounded-xl font-outfit text-neutro-carbon focus:ring-2 focus:ring-crecimiento-300 outline-none disabled:opacity-50 min-h-[44px] cursor-pointer"
                       >
                         <option value="">Sin zona</option>
                         {zonas.map(z => (

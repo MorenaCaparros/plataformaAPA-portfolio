@@ -69,7 +69,7 @@ function Modal({ titulo, onClose, children }: ModalProps) {
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{titulo}</h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            className="w-11 h-11 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
           >
             ✕
           </button>
@@ -578,7 +578,7 @@ export default function CapacitacionesPage() {
                         <button
                           onClick={() => toggleActivo(modulo)}
                           title={modulo.activo ? 'Desactivar' : 'Activar'}
-                          className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm transition-colors ${
+                          className={`w-11 h-11 rounded-lg flex items-center justify-center text-sm transition-colors ${
                             modulo.activo
                               ? 'bg-green-100 text-green-600 hover:bg-green-200'
                               : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
@@ -588,13 +588,13 @@ export default function CapacitacionesPage() {
                         </button>
                         <button
                           onClick={() => setModalEditar(modulo)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-sm bg-sol-50 text-sol-600 hover:bg-sol-100 transition-colors"
+                          className="w-11 h-11 rounded-lg flex items-center justify-center text-sm bg-sol-50 text-sol-600 hover:bg-sol-100 transition-colors"
                         >
                           ✏️
                         </button>
                         <button
                           onClick={() => setConfirmEliminar(modulo)}
-                          className="w-8 h-8 rounded-lg flex items-center justify-center text-sm bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
+                          className="w-11 h-11 rounded-lg flex items-center justify-center text-sm bg-red-50 text-red-500 hover:bg-red-100 transition-colors"
                         >
                           🗑
                         </button>

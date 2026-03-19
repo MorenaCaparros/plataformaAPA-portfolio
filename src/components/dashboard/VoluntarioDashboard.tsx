@@ -450,7 +450,7 @@ export default function VoluntarioDashboard({ userId }: VoluntarioDashboardProps
           <div className="relative" ref={notifPanelRef}>
           <button
             onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2.5 rounded-xl bg-white/60 backdrop-blur-md border border-white/60 shadow-md hover:shadow-lg transition-all active:scale-95"
+            className="relative p-3 rounded-xl bg-white/60 backdrop-blur-md border border-white/60 shadow-md hover:shadow-lg transition-all active:scale-95"
             aria-label="Notificaciones"
           >
             <span className="text-xl">🔔</span>

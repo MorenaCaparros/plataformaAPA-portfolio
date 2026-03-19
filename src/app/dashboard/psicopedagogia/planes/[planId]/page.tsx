@@ -601,7 +601,7 @@ export default function PlanDetailPage() {
                         key={key}
                         type="button"
                         onClick={() => setTipoComentario(key)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all min-h-[32px] ${
+                        className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all min-h-[44px] ${
                           tipoComentario === key
                             ? conf.color + ' ring-2 ring-offset-1 ring-gray-300'
                             : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
