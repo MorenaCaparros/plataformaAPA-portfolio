@@ -2,7 +2,7 @@ export default function AnimatedBackground() {
   return (
     <div className="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
       {/* Fondo base */}
-      <div className="absolute inset-0 bg-neutro-lienzo" />
+      <div className="absolute inset-0 bg-neutro-lienzo dark:bg-dark-bg" />
       
       {/* Textura de ruido sutil para efecto táctil */}
       <div 
@@ -17,19 +17,19 @@ export default function AnimatedBackground() {
 
       {/* Blob 1 - Amarillo (arriba derecha) */}
       <div
-        className="absolute -top-40 -right-40 w-96 h-96 bg-sol-400/20 rounded-full blur-3xl animate-blob"
+        className="absolute -top-40 -right-40 w-96 h-96 bg-sol-400/20 dark:bg-sol-400/10 rounded-full blur-3xl animate-blob"
         aria-hidden="true"
       />
 
       {/* Blob 2 - Verde (abajo izquierda) */}
       <div
-        className="absolute -bottom-40 -left-40 w-96 h-96 bg-crecimiento-400/20 rounded-full blur-3xl animate-blob animation-delay-2000"
+        className="absolute -bottom-40 -left-40 w-96 h-96 bg-crecimiento-400/20 dark:bg-crecimiento-400/10 rounded-full blur-3xl animate-blob animation-delay-2000"
         aria-hidden="true"
       />
 
       {/* Blob 3 - Rojo suave (centro derecha) */}
       <div
-        className="absolute top-1/2 -right-20 w-72 h-72 bg-impulso-400/10 rounded-full blur-3xl animate-blob animation-delay-4000"
+        className="absolute top-1/2 -right-20 w-72 h-72 bg-impulso-400/10 dark:bg-impulso-400/5 rounded-full blur-3xl animate-blob animation-delay-4000"
         aria-hidden="true"
       />
 

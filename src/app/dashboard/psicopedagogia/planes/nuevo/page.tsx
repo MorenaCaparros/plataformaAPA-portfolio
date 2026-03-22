@@ -60,15 +60,18 @@ export default function NuevoPlanPage() {
   const [areaFiltro, setAreaFiltro] = useState<string>('todos');
 
   const [form, setForm] = useState({
-    nino_id: '',
+    ninos_ids: [] as string[],
     titulo: '',
     descripcion: '',
     area: 'general',
     prioridad: 'media',
-    fecha_fin_estimada: '',
+    semanas_duracion: 4,
     objetivos: [''],
     actividades_sugeridas: '',
   });
+
+  // Búsqueda para filtrar niños en la selección
+  const [busquedaNinos, setBusquedaNinos] = useState('');
 
   useEffect(() => {
     fetchNinos();
@@ -130,8 +133,8 @@ export default function NuevoPlanPage() {
     e.preventDefault();
     setError('');
 
-    if (!form.nino_id) {
-      setError('Seleccioná un niño.');
+    if (form.ninos_ids.length === 0) {
+      setError('Seleccioná al menos un niño/a.');
       return;
     }
     if (!form.titulo.trim()) {
@@ -142,28 +145,37 @@ export default function NuevoPlanPage() {
     try {
       setLoading(true);
       const objetivosFiltrados = form.objetivos.filter((o) => o.trim() !== '');
+      const fechaFin = new Date(Date.now() + form.semanas_duracion * 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10);
+
+      // Crear un plan por cada niño seleccionado
+      const inserts = form.ninos_ids.map((nino_id) => ({
+        nino_id,
+        creado_por: user!.id,
+        titulo: form.titulo.trim(),
+        descripcion: form.descripcion.trim() || null,
+        area: form.area,
+        prioridad: form.prioridad,
+        fecha_fin_estimada: fechaFin,
+        objetivos: objetivosFiltrados,
+        actividades_sugeridas: form.actividades_sugeridas.trim() || null,
+      }));
 
       const { data, error: insertError } = await supabase
         .from('planes_intervencion')
-        .insert({
-          nino_id: form.nino_id,
-          creado_por: user!.id,
-          titulo: form.titulo.trim(),
-          descripcion: form.descripcion.trim() || null,
-          area: form.area,
-          prioridad: form.prioridad,
-          fecha_fin_estimada: form.fecha_fin_estimada || null,
-          objetivos: objetivosFiltrados,
-          actividades_sugeridas: form.actividades_sugeridas.trim() || null,
-        })
-        .select('id')
-        .single();
+        .insert(inserts)
+        .select('id');
 
       if (insertError) throw insertError;
 
       setSuccess(true);
       setTimeout(() => {
-        router.push(`/dashboard/psicopedagogia/planes/${data.id}`);
+        if (inserts.length === 1 && data?.[0]?.id) {
+          router.push(`/dashboard/psicopedagogia/planes/${data[0].id}`);
+        } else {
+          router.push('/dashboard/psicopedagogia/planes');
+        }
       }, 1000);
     } catch (err: any) {
       console.error('Error al crear plan:', err);
@@ -328,30 +340,69 @@ export default function NuevoPlanPage() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Niño selector */}
+          {/* Niños/as a asignar — múltiple */}
           <div className="bg-white/60 backdrop-blur-md rounded-3xl border border-white/60 p-6 shadow-lg">
-            <h2 className="font-quicksand text-lg font-semibold text-neutro-carbon mb-4 flex items-center gap-2">
+            <h2 className="font-quicksand text-lg font-semibold text-neutro-carbon mb-1 flex items-center gap-2">
               <User className="w-5 h-5 text-impulso-400" />
-              Niño/a
+              Niños/as a asignar
             </h2>
+            <p className="font-outfit text-xs text-gray-500 mb-4">
+              Podés seleccionar varios niños con la misma problemática — se creará un plan por cada uno.
+            </p>
             {loadingNinos ? (
               <div className="flex items-center gap-2 text-gray-500">
                 <Loader2 className="w-4 h-4 animate-spin" /> Cargando niños...
               </div>
             ) : (
-              <select
-                value={form.nino_id}
-                onChange={(e) => setForm((f) => ({ ...f, nino_id: e.target.value }))}
-                className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 font-outfit text-sm focus:ring-2 focus:ring-impulso-400 focus:border-transparent min-h-[44px]"
-                required
-              >
-                <option value="">Seleccionar niño/a...</option>
-                {ninos.map((n) => (
-                  <option key={n.id} value={n.id}>
-                    {n.alias} — {n.rango_etario}
-                  </option>
-                ))}
-              </select>
+              <>
+                <input
+                  type="text"
+                  placeholder="Filtrar por nombre..."
+                  value={busquedaNinos}
+                  onChange={(e) => setBusquedaNinos(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 font-outfit text-sm mb-3 focus:ring-2 focus:ring-impulso-400 focus:border-transparent"
+                />
+                <div className="max-h-48 overflow-y-auto space-y-1 border border-gray-100 dark:border-gray-700 rounded-2xl p-2">
+                  {ninos
+                    .filter((n) => n.alias.toLowerCase().includes(busquedaNinos.toLowerCase()))
+                    .map((n) => {
+                      const checked = form.ninos_ids.includes(n.id);
+                      return (
+                        <label
+                          key={n.id}
+                          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl cursor-pointer transition-colors ${
+                            checked
+                              ? 'bg-impulso-50 dark:bg-impulso-900/30'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-700'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={(e) =>
+                              setForm((f) => ({
+                                ...f,
+                                ninos_ids: e.target.checked
+                                  ? [...f.ninos_ids, n.id]
+                                  : f.ninos_ids.filter((id) => id !== n.id),
+                              }))
+                            }
+                            className="w-4 h-4 accent-impulso-500 rounded"
+                          />
+                          <span className="font-outfit text-sm text-neutro-carbon dark:text-white flex-1">
+                            {n.alias}
+                          </span>
+                          <span className="font-outfit text-xs text-gray-400">{n.rango_etario} años</span>
+                        </label>
+                      );
+                    })}
+                </div>
+                {form.ninos_ids.length > 0 && (
+                  <p className="font-outfit text-xs text-impulso-600 mt-2">
+                    ✓ {form.ninos_ids.length} niño/a{form.ninos_ids.length > 1 ? 's' : ''} seleccionado{form.ninos_ids.length > 1 ? 's' : ''}
+                  </p>
+                )}
+              </>
             )}
           </div>
 
@@ -424,14 +475,22 @@ export default function NuevoPlanPage() {
 
               <div>
                 <label className="block font-outfit text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Fecha estimada de finalización
+                  Duración del plan (en semanas)
                 </label>
-                <input
-                  type="date"
-                  value={form.fecha_fin_estimada}
-                  onChange={(e) => setForm((f) => ({ ...f, fecha_fin_estimada: e.target.value }))}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 font-outfit text-sm focus:ring-2 focus:ring-impulso-400 min-h-[44px]"
-                />
+                <div className="flex items-center gap-3 flex-wrap">
+                  <input
+                    type="number"
+                    min="1"
+                    max="52"
+                    value={form.semanas_duracion}
+                    onChange={(e) => setForm((f) => ({ ...f, semanas_duracion: Number(e.target.value) }))}
+                    className="w-28 px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 font-outfit text-sm focus:ring-2 focus:ring-impulso-400 min-h-[44px]"
+                  />
+                  <span className="font-outfit text-sm text-gray-500">semanas desde hoy</span>
+                  <span className="font-outfit text-xs text-gray-400">
+                    {`(finalizaría el ${new Date(Date.now() + form.semanas_duracion * 7 * 24 * 60 * 60 * 1000).toLocaleDateString('es-AR', { day: '2-digit', month: 'short', year: 'numeric' })})`}
+                  </span>
+                </div>
               </div>
 
               <div>
@@ -534,7 +593,7 @@ export default function NuevoPlanPage() {
               ) : (
                 <>
                   <Plus className="w-5 h-5" />
-                  Crear Plan
+                  {form.ninos_ids.length > 1 ? `Crear ${form.ninos_ids.length} Planes` : 'Crear Plan'}
                 </>
               )}
             </button>

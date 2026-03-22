@@ -1,9 +1,17 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import SelectorNino from '@/components/forms/SelectorNino';
+import VoiceToText from '@/components/forms/VoiceToText';
 import { supabase } from '@/lib/supabase/client';
+
+const NIVELES_ALFABETIZACION = [
+  'Pre-silábico',
+  'Silábico',
+  'Silábico-Alfabético',
+  'Alfabético inicial',
+  'Alfabético',
+];
 
 function NuevaEvaluacionForm() {
   const router = useRouter();
@@ -11,7 +19,20 @@ function NuevaEvaluacionForm() {
   const ninoIdParam = searchParams.get('ninoId');
 
   const [loading, setLoading] = useState(false);
-  const [ninoId, setNinoId] = useState<string | null>(ninoIdParam);
+  const [ninoId, setNinoId] = useState<string>(ninoIdParam ?? '');
+  const [ninos, setNinos] = useState<Array<{ id: string; alias: string; legajo: string | null }>>([]);
+  const [loadingNinos, setLoadingNinos] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from('ninos')
+      .select('id, alias, legajo')
+      .order('alias', { ascending: true })
+      .then((result: { data: { id: string; alias: string; legajo: string | null }[] | null }) => {
+        setNinos(result.data || []);
+        setLoadingNinos(false);
+      });
+  }, []);
 
   const [formData, setFormData] = useState({
     // Lenguaje y Vocabulario
@@ -62,6 +83,7 @@ function NuevaEvaluacionForm() {
     try {
       if (!ninoId) {
         alert('⚠️ Por favor seleccioná un niño primero');
+        setLoading(false);
         return;
       }
 
@@ -111,7 +133,26 @@ function NuevaEvaluacionForm() {
           </p>
         </div>
 {/* Selector de Niño */}
-        <SelectorNino onSelect={setNinoId} initialNinoId={ninoIdParam} />
+        <div className="bg-white rounded-lg shadow p-6 mb-8">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Niño/a a evaluar</label>
+          {loadingNinos ? (
+            <p className="text-sm text-gray-400">Cargando niños...</p>
+          ) : (
+            <select
+              value={ninoId}
+              onChange={(e) => setNinoId(e.target.value)}
+              className="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-2 focus:ring-crecimiento-500 focus:border-crecimiento-500 outline-none"
+              required
+            >
+              <option value="">Seleccionar niño/a...</option>
+              {ninos.map((n) => (
+                <option key={n.id} value={n.id}>
+                  {n.alias}{n.legajo ? ` (Legajo: ${n.legajo})` : ''}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
 
         
         <form onSubmit={handleSubmit} className="space-y-8">
@@ -219,9 +260,10 @@ function NuevaEvaluacionForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Notas adicionales
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">Notas adicionales</label>
+                  <VoiceToText currentText={formData.notas_lenguaje} onTranscript={(t) => setFormData({ ...formData, notas_lenguaje: t })} />
+                </div>
                 <textarea
                   value={formData.notas_lenguaje}
                   onChange={(e) =>
@@ -307,9 +349,10 @@ function NuevaEvaluacionForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Notas adicionales
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">Notas adicionales</label>
+                  <VoiceToText currentText={formData.notas_grafismo} onTranscript={(t) => setFormData({ ...formData, notas_grafismo: t })} />
+                </div>
                 <textarea
                   value={formData.notas_grafismo}
                   onChange={(e) =>
@@ -331,9 +374,10 @@ function NuevaEvaluacionForm() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Dificultades identificadas
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">Dificultades identificadas</label>
+                  <VoiceToText currentText={formData.dificultades_identificadas} onTranscript={(t) => setFormData({ ...formData, dificultades_identificadas: t })} />
+                </div>
                 <textarea
                   value={formData.dificultades_identificadas}
                   onChange={(e) =>
@@ -350,9 +394,10 @@ function NuevaEvaluacionForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Fortalezas observadas
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">Fortalezas observadas</label>
+                  <VoiceToText currentText={formData.fortalezas} onTranscript={(t) => setFormData({ ...formData, fortalezas: t })} />
+                </div>
                 <textarea
                   value={formData.fortalezas}
                   onChange={(e) =>
@@ -369,22 +414,26 @@ function NuevaEvaluacionForm() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Nivel de alfabetización estimado
                 </label>
-                <input
-                  type="text"
+                <select
                   value={formData.nivel_alfabetizacion}
                   onChange={(e) =>
                     setFormData({ ...formData, nivel_alfabetizacion: e.target.value })
                   }
-                  className="w-full border border-gray-300 rounded-md p-2 text-sm"
-                  placeholder="Ej: Pre-silábico, Silábico, etc."
+                  className="w-full border border-gray-300 rounded-md p-2 text-sm focus:ring-2 focus:ring-crecimiento-500 outline-none"
                   required
-                />
+                >
+                  <option value="">Seleccionar nivel...</option>
+                  {NIVELES_ALFABETIZACION.map((n) => (
+                    <option key={n} value={n}>{n}</option>
+                  ))}
+                </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Observaciones generales
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">Observaciones generales</label>
+                  <VoiceToText currentText={formData.observaciones_generales} onTranscript={(t) => setFormData({ ...formData, observaciones_generales: t })} />
+                </div>
                 <textarea
                   value={formData.observaciones_generales}
                   onChange={(e) =>
@@ -401,9 +450,10 @@ function NuevaEvaluacionForm() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Recomendaciones iniciales
-                </label>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-gray-700">Recomendaciones iniciales</label>
+                  <VoiceToText currentText={formData.recomendaciones} onTranscript={(t) => setFormData({ ...formData, recomendaciones: t })} />
+                </div>
                 <textarea
                   value={formData.recomendaciones}
                   onChange={(e) =>

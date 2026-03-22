@@ -701,10 +701,10 @@ export default function AsistenciaPage() {
               type="button"
               onClick={handleGuardar}
               disabled={saving || !haycambios}
-              className={`w-full px-6 py-4 min-h-[56px] rounded-2xl font-semibold active:scale-95 flex items-center justify-center gap-2 transition-all font-outfit text-lg ${
+              className={`w-full px-6 py-4 min-h-[56px] rounded-2xl font-semibold active:scale-95 flex items-center justify-center gap-2 transition-all font-outfit ${
                 haycambios
-                  ? 'bg-gradient-to-r from-crecimiento-500 to-crecimiento-400 text-white shadow-glow-crecimiento'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  ? 'text-lg bg-gradient-to-r from-crecimiento-500 to-crecimiento-400 text-white shadow-glow-crecimiento'
+                  : 'text-sm bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
               {saving ? (
@@ -716,7 +716,7 @@ export default function AsistenciaPage() {
                 </>
               ) : (
                 <>
-                  <CheckCircle className="w-5 h-5" />
+                  <CheckCircle className="w-4 h-4" />
                   Sin cambios pendientes
                 </>
               )}
@@ -739,10 +739,10 @@ export default function AsistenciaPage() {
               type="button"
               onClick={handleGuardarVol}
               disabled={savingVol || !haycambiosVol}
-              className={`w-full px-6 py-4 min-h-[56px] rounded-2xl font-semibold active:scale-95 flex items-center justify-center gap-2 transition-all font-outfit text-lg ${
+              className={`w-full px-6 py-4 min-h-[56px] rounded-2xl font-semibold active:scale-95 flex items-center justify-center gap-2 transition-all font-outfit ${
                 haycambiosVol
-                  ? 'bg-gradient-to-r from-crecimiento-500 to-crecimiento-400 text-white shadow-glow-crecimiento'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  ? 'text-lg bg-gradient-to-r from-crecimiento-500 to-crecimiento-400 text-white shadow-glow-crecimiento'
+                  : 'text-sm bg-gray-200 text-gray-400 cursor-not-allowed'
               }`}
             >
               {savingVol ? (
@@ -754,7 +754,7 @@ export default function AsistenciaPage() {
                 </>
               ) : (
                 <>
-                  <CheckCircle className="w-5 h-5" />
+                  <CheckCircle className="w-4 h-4" />
                   Sin cambios pendientes
                 </>
               )}

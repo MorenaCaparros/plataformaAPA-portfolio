@@ -13,7 +13,6 @@ interface SesionDetalle {
   observaciones_libres: string;
   objetivo_sesion: string | null;
   actividad_realizada: string | null;
-  tipo_sesion: string | null;
   items: Array<{
     id: string;
     categoria: Categoria;
@@ -50,7 +49,6 @@ export default function SesionDetallePage() {
           observaciones_libres,
           objetivo_sesion,
           actividad_realizada,
-          tipo_sesion,
           items,
           ninos (
             alias,
@@ -64,9 +62,7 @@ export default function SesionDetallePage() {
       if (error) throw error;
       setSesion(data);
     } catch (error) {
-      console.error('Error:', error);
-      alert('No se pudo cargar la sesión');
-      router.back();
+      console.error('Error cargando sesión:', error);
     } finally {
       setLoading(false);
     }
@@ -111,7 +107,14 @@ export default function SesionDetallePage() {
     );
   }
 
-  if (!sesion) return null;
+  if (!sesion) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="bg-white/60 backdrop-blur-md rounded-3xl border border-white/60 p-8 shadow text-center max-w-sm">
+        <p className="text-neutro-carbon font-outfit text-lg mb-4">No se pudo cargar la sesión.</p>
+        <button onClick={() => router.back()} className="px-6 py-2 bg-sol-400 text-white rounded-2xl font-outfit">Volver</button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen pb-8">

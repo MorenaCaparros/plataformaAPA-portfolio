@@ -310,10 +310,6 @@ export default function BibliotecaPage() {
               className="px-6 py-4 bg-gradient-to-r from-crecimiento-500 to-crecimiento-600 text-white rounded-2xl hover:shadow-glow-crecimiento-lg transition-all font-outfit font-semibold text-center min-h-[56px] flex items-center justify-center active:scale-95 shadow-glow-crecimiento">
               <span className="mr-2">📁</span> Archivos
             </Link>
-            <Link href="/dashboard/biblioteca/chat"
-              className="px-6 py-4 bg-gradient-to-r from-sol-400 to-sol-500 text-white rounded-2xl hover:shadow-[0_8px_24px_rgba(242,201,76,0.25)] transition-all font-outfit font-semibold text-center min-h-[56px] flex items-center justify-center active:scale-95 shadow-[0_4px_16px_rgba(242,201,76,0.15)]">
-              <span className="mr-2">💬</span> Chat con IA
-            </Link>
             {(perfil?.rol === 'psicopedagogia' || perfil?.rol === 'director') && (
               <Link href="/dashboard/biblioteca/subir"
                 className="px-6 py-4 bg-gradient-to-r from-crecimiento-400 to-crecimiento-500 text-white rounded-2xl hover:shadow-[0_8px_24px_rgba(164,198,57,0.25)] transition-all font-outfit font-semibold text-center min-h-[56px] flex items-center justify-center active:scale-95 shadow-[0_4px_16px_rgba(164,198,57,0.15)]">

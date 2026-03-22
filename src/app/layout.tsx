@@ -46,9 +46,8 @@ export default function RootLayout({
               (function() {
                 try {
                   var saved = localStorage.getItem('apa-theme');
-                  var isDark = saved === 'dark' ||
-                    (!saved || saved === 'system') &&
-                    window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  // Default: light. Solo activar dark si explícitamente guardado.
+                  var isDark = saved === 'dark';
                   if (isDark) document.documentElement.classList.add('dark');
                 } catch(e) {}
               })();

@@ -378,9 +378,9 @@ export default function ConfiguracionPage() {
               Seguridad y Privacidad
             </h3>
             <div className="space-y-3">
-              <button className="px-4 py-3 w-full bg-white/80 backdrop-blur-sm border border-white/60 text-neutro-carbon rounded-2xl hover:shadow-[0_4px_16px_rgba(242,201,76,0.15)] transition-all font-medium font-outfit min-h-[56px] active:scale-95">
-                Ver log de accesos
-              </button>
+              <Link href="/dashboard/audit-log" className="px-4 py-3 w-full bg-white/80 backdrop-blur-sm border border-white/60 text-neutro-carbon rounded-2xl hover:shadow-[0_4px_16px_rgba(242,201,76,0.15)] transition-all font-medium font-outfit min-h-[56px] active:scale-95 flex items-center justify-center gap-2">
+                🔍 Ver Log de Auditoría
+              </Link>
               <button className="px-4 py-3 w-full bg-white/80 backdrop-blur-sm border border-white/60 text-neutro-carbon rounded-2xl hover:shadow-[0_4px_16px_rgba(242,201,76,0.15)] transition-all font-medium font-outfit min-h-[56px] active:scale-95">
                 Auditoría de permisos
               </button>

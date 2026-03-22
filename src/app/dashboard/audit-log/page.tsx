@@ -63,17 +63,54 @@ function AccionBadge({ accion }: { accion: string }) {
   );
 }
 
+// Mapeo de nombres técnicos a etiquetas amigables
+const CAMPO_LABEL: Record<string, string> = {
+  alias:              'Nombre del niño',
+  nivel_alfabetizacion: 'Nivel de alfabetización',
+  escolarizado:       'Estado escolar',
+  activo:             'Estado activo',
+  zona_id:            'Zona asignada',
+  fecha_nacimiento:   'Fecha de nacimiento',
+  nombre_completo:    'Nombre completo',
+  observaciones:      'Observaciones',
+  items:              'Ítems de sesión',
+  fecha:              'Fecha',
+  duracion_minutos:   'Duración',
+  voluntario_id:      'Voluntario',
+  nino_id:            'Niño',
+  presente:           'Presente',
+  updated_at:         'Última actualización',
+  created_at:         'Fecha de creación',
+  ultima_conexion:    'Última conexión',
+  email:              'Email',
+  rol:                'Rol',
+  nombre:             'Nombre',
+  apellido:           'Apellido',
+  telefono:           'Teléfono',
+  activa:             'Asignación activa',
+  capacitacion_id:    'Capacitación',
+  puntaje:            'Puntaje',
+  completado:         'Completado',
+  contenido:          'Contenido',
+  titulo:             'Título',
+  tipo:               'Tipo',
+};
+
 function CamposModificados({ campos }: { campos: string[] | null }) {
+  // Filtrar campos puramente técnicos para usuarios no técnicos
+  const CAMPOS_OCULTOS = new Set(['id', 'updated_at', 'created_at', 'sincronizado_at']);
   if (!campos?.length) return <span className="text-neutro-piedra text-xs">—</span>;
+  const visibles = campos.filter(c => !CAMPOS_OCULTOS.has(c));
+  if (!visibles.length) return <span className="text-neutro-piedra text-xs">Sin cambios visibles</span>;
   return (
     <div className="flex flex-wrap gap-1">
-      {campos.slice(0, 4).map((c) => (
-        <span key={c} className="bg-neutro-lienzo border border-neutro-piedra/20 text-neutro-piedra text-xs px-2 py-0.5 rounded-lg font-mono">
-          {c}
+      {visibles.slice(0, 4).map((c) => (
+        <span key={c} className="bg-neutro-lienzo border border-neutro-piedra/20 text-neutro-piedra text-xs px-2 py-0.5 rounded-lg font-outfit">
+          {CAMPO_LABEL[c] ?? c.replace(/_/g, ' ')}
         </span>
       ))}
-      {campos.length > 4 && (
-        <span className="text-neutro-piedra text-xs">+{campos.length - 4}</span>
+      {visibles.length > 4 && (
+        <span className="text-neutro-piedra text-xs">+{visibles.length - 4} más</span>
       )}
     </div>
   );
@@ -275,8 +312,8 @@ export default function AuditLogPage() {
                     <th className="text-left px-4 py-3 font-outfit font-semibold text-neutro-piedra text-xs uppercase tracking-wide">Usuario</th>
                     <th className="text-left px-4 py-3 font-outfit font-semibold text-neutro-piedra text-xs uppercase tracking-wide">Tabla</th>
                     <th className="text-left px-4 py-3 font-outfit font-semibold text-neutro-piedra text-xs uppercase tracking-wide">Acción</th>
-                    <th className="text-left px-4 py-3 font-outfit font-semibold text-neutro-piedra text-xs uppercase tracking-wide">Campos modificados</th>
-                    <th className="text-left px-4 py-3 font-outfit font-semibold text-neutro-piedra text-xs uppercase tracking-wide">ID fila</th>
+                    <th className="text-left px-4 py-3 font-outfit font-semibold text-neutro-piedra text-xs uppercase tracking-wide">Qué cambió</th>
+                    <th className="text-left px-4 py-3 font-outfit font-semibold text-neutro-piedra text-xs uppercase tracking-wide hidden xl:table-cell">Registro</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-neutro-piedra/10">
@@ -366,8 +403,8 @@ function LogRow({ log }: { log: AuditLog }) {
       <td className="px-4 py-3">
         <CamposModificados campos={log.campos_modificados} />
       </td>
-      <td className="px-4 py-3 font-mono text-[10px] text-neutro-piedra truncate max-w-[120px]">
-        {log.fila_id}
+      <td className="px-4 py-3 font-mono text-[10px] text-neutro-piedra/60 hidden xl:table-cell" title={log.fila_id}>
+        {log.fila_id?.slice(0, 8)}…
       </td>
     </tr>
   );

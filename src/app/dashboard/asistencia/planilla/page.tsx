@@ -48,6 +48,8 @@ export default function PlanillaAsistenciaPage() {
   const [asistencias, setAsistencias] = useState<AsistenciaRecord[]>([]);
   const [zonas, setZonas] = useState<Zona[]>([]);
   const [zonaFiltro, setZonaFiltro] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const ROWS_PER_PAGE = 20;
   const [loading, setLoading] = useState(true);
   const [loadingAsistencias, setLoadingAsistencias] = useState(false);
 
@@ -172,6 +174,13 @@ export default function PlanillaAsistenciaPage() {
     return ninos.filter(n => n.zona_id === zonaFiltro);
   }, [ninos, zonaFiltro]);
 
+  // Reset page when filter or data changes
+  const totalPages = Math.ceil(ninosFiltrados.length / ROWS_PER_PAGE);
+  const ninosPaginados = ninosFiltrados.slice(
+    (currentPage - 1) * ROWS_PER_PAGE,
+    currentPage * ROWS_PER_PAGE
+  );
+
   // ─── Stats generales ───────────────────────────────────────────────────────
   const statsGenerales = useMemo(() => {
     let totalRegistros = 0;
@@ -278,7 +287,7 @@ export default function PlanillaAsistenciaPage() {
               </label>
               <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={() => setZonaFiltro('')}
+                  onClick={() => { setZonaFiltro(''); setCurrentPage(1); }}
                   className={`px-3 py-1.5 rounded-xl text-sm font-outfit font-medium transition-all ${
                     !zonaFiltro
                       ? 'bg-crecimiento-500 text-white'
@@ -290,7 +299,7 @@ export default function PlanillaAsistenciaPage() {
                 {zonas.map(z => (
                   <button
                     key={z.id}
-                    onClick={() => setZonaFiltro(z.id)}
+                    onClick={() => { setZonaFiltro(z.id); setCurrentPage(1); }}
                     className={`px-3 py-1.5 rounded-xl text-sm font-outfit font-medium transition-all ${
                       zonaFiltro === z.id
                         ? 'bg-crecimiento-500 text-white'
@@ -396,7 +405,7 @@ export default function PlanillaAsistenciaPage() {
                 </tr>
               </thead>
               <tbody>
-                {ninosFiltrados.map((nino, rowIdx) => {
+                {ninosPaginados.map((nino, rowIdx) => {
                   const pct = pctPorNino[nino.id];
                   const rowBg = rowIdx % 2 === 0 ? 'bg-white/40' : 'bg-gray-50/40';
 
@@ -459,6 +468,29 @@ export default function PlanillaAsistenciaPage() {
                 })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {/* Paginación de filas */}
+        {totalPages > 1 && (
+          <div className="max-w-2xl mx-auto mt-4 flex items-center justify-between gap-2">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 rounded-xl text-sm font-outfit font-medium bg-white/60 border border-white/60 text-neutro-carbon hover:bg-crecimiento-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            >
+              ← Anterior
+            </button>
+            <span className="text-sm font-outfit text-neutro-piedra">
+              Página {currentPage} de {totalPages} · {ninosFiltrados.length} niños
+            </span>
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 rounded-xl text-sm font-outfit font-medium bg-white/60 border border-white/60 text-neutro-carbon hover:bg-crecimiento-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+            >
+              Siguiente →
+            </button>
           </div>
         )}
 
