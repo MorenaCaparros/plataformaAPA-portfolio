@@ -33,31 +33,31 @@ const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
 const DEMO_USERS = [
   {
     id: 'b1000000-0000-0000-0000-000000000001',
-    email: 'admin@demo.apa',
+    email: 'admin.demo.apa@gmail.com',
     password: 'Demo1234!',
     nombre: 'Ana', apellido: 'García', rol: 'admin',
   },
   {
     id: 'b1000000-0000-0000-0000-000000000002',
-    email: 'equipo@demo.apa',
+    email: 'equipo.demo.apa@gmail.com',
     password: 'Demo1234!',
     nombre: 'Laura', apellido: 'Méndez', rol: 'equipo_profesional',
   },
   {
     id: 'b1000000-0000-0000-0000-000000000006',
-    email: 'voluntario1@demo.apa',
+    email: 'voluntario.demo.apa@gmail.com',
     password: 'Demo1234!',
     nombre: 'Diego', apellido: 'Torres', rol: 'voluntario',
   },
   {
     id: 'b1000000-0000-0000-0000-000000000007',
-    email: 'voluntario2@demo.apa',
+    email: 'voluntario2.demo.apa@gmail.com',
     password: 'Demo1234!',
     nombre: 'Sofía', apellido: 'Martínez', rol: 'voluntario',
   },
   {
     id: 'b1000000-0000-0000-0000-000000000008',
-    email: 'voluntario3@demo.apa',
+    email: 'voluntario3.demo.apa@gmail.com',
     password: 'Demo1234!',
     nombre: 'Tomás', apellido: 'Flórez', rol: 'voluntario',
   },
@@ -90,9 +90,9 @@ async function createDemoUsers() {
   console.log('\n─────────────────────────────────────────────────');
   console.log('🔑 Credenciales de acceso (todas las cuentas):');
   console.log('   Password: Demo1234!\n');
-  console.log('   admin@demo.apa           → Admin');
-  console.log('   equipo@demo.apa          → Equipo Profesional');
-  console.log('   voluntario1@demo.apa     → Voluntario');
+  console.log('   admin.demo.apa@gmail.com       → Admin');
+  console.log('   equipo.demo.apa@gmail.com      → Equipo Profesional');
+  console.log('   voluntario.demo.apa@gmail.com  → Voluntario');
   console.log('\n✅ Listo. Levantar el servidor: npm run dev');
 }
 

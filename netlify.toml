@@ -16,12 +16,6 @@
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Redirects and rewrites
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-
 # Headers for security
 [[headers]]
   for = "/*"

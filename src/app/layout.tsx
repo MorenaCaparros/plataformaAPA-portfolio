@@ -13,6 +13,9 @@ export const metadata: Metadata = {
   title: "Plataforma APA",
   description: "Sistema de seguimiento educativo - GlobalIA & Asociación Civil Adelante",
   manifest: "/manifest.json",
+  other: {
+    "mobile-web-app-capable": "yes",
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",

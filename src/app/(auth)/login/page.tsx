@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 
 const DEMO_USERS = [
-  { label: 'Admin',             email: 'admin@demo.apa',       password: 'Demo1234!', emoji: '🛡️' },
-  { label: 'Equipo Profesional', email: 'equipo@demo.apa',      password: 'Demo1234!', emoji: '🎓' },
-  { label: 'Voluntario',        email: 'voluntario1@demo.apa', password: 'Demo1234!', emoji: '🙋' },
+  { label: 'Admin',              email: 'admin@demo.apa',        password: 'Demo1234!', emoji: '🛡️' },
+  { label: 'Equipo Profesional', email: 'equipo@demo.apa',       password: 'Demo1234!', emoji: '🎓' },
+  { label: 'Voluntario',         email: 'voluntario1@demo.apa',  password: 'Demo1234!', emoji: '🙋' },
 ];
 
 export default function LoginPage() {
@@ -36,8 +36,15 @@ export default function LoginPage() {
         window.location.href = '/dashboard';
       }
     } catch (error: any) {
-      console.error('Error login:', error);
-      setError(error.message || 'Error al iniciar sesión');
+      console.error('[Login] error completo:', error);
+      const msg = error?.message || '';
+      if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
+        setError('Email o contraseña incorrectos.');
+      } else if (msg.includes('Email not confirmed')) {
+        setError('El email no está confirmado. Revisá tu casilla.');
+      } else {
+        setError(msg || 'Error al iniciar sesión. Abrí la consola para más detalle.');
+      }
     } finally {
       setLoading(false);
     }
@@ -71,10 +78,24 @@ export default function LoginPage() {
         email: demoEmail,
         password: demoPassword,
       });
+      console.log('[Demo Login] resultado:', { data, error });
       if (error) throw error;
-      if (data.user) window.location.href = '/dashboard';
+      if (data.user) {
+        console.log('[Demo Login] OK, redirigiendo al dashboard...');
+        window.location.href = '/dashboard';
+      } else {
+        setDemoError('Login sin error pero sin usuario. Intentá de nuevo.');
+      }
     } catch (error: any) {
-      setDemoError('No se pudo acceder al usuario demo. Verificá que esté creado en Supabase.');
+      console.error('[Demo Login] error completo:', error);
+      const msg = error?.message || '';
+      if (msg.includes('Invalid login credentials') || msg.includes('invalid_credentials')) {
+        setDemoError('Credenciales incorrectas. Corré el SQL de reset de contraseñas en Supabase.');
+      } else if (msg.includes('Email not confirmed')) {
+        setDemoError('El email no está confirmado. Activá "Auto Confirm" en Supabase Authentication.');
+      } else {
+        setDemoError(`Error: ${msg || 'Desconocido. Abrí la consola para más detalle.'}`);
+      }
     } finally {
       setDemoLoading(null);
     }
