@@ -54,14 +54,7 @@ export async function GET(request: NextRequest) {
     // Obtener todos los perfiles con datos completos
     const { data: perfiles, error: perfilesError } = await supabaseAdmin
       .from('perfiles')
-      .select(`
-        id, nombre, apellido, rol, zona_id,
-        telefono, email, direccion,
-        foto_perfil_url, fecha_ingreso, max_ninos_asignados,
-        activo, password_temporal, ultima_conexion, notas,
-        created_at, updated_at,
-        zonas ( id, nombre )
-      `)
+      .select(`*, zonas ( id, nombre )`)
       .order('created_at', { ascending: false });
 
     if (perfilesError) throw perfilesError;

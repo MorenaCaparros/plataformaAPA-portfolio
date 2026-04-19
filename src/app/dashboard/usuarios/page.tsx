@@ -59,14 +59,15 @@ function UsuariosPageContent() {
   const rolesPermitidos = ['director', 'admin', 'psicopedagogia', 'equipo_profesional'];
 
   useEffect(() => {
-    if (!authLoading && user) {
-      if (!rolesPermitidos.includes(perfil?.rol || '')) {
+    if (!authLoading && user && perfil?.rol) {
+      if (!rolesPermitidos.includes(perfil.rol)) {
         router.push('/dashboard');
         return;
       }
       fetchUsuarios();
     }
-  }, [authLoading, user, perfil]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, user, perfil?.rol]);
 
   useEffect(() => {
     if (zonaParam) setFiltroZona(zonaParam);
