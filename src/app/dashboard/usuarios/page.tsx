@@ -53,6 +53,7 @@ function UsuariosPageContent() {
   const [vistaCards, setVistaCards] = useState(true);
   const [perfilExpandido, setPerfilExpandido] = useState<string | null>(null);
   const [zonas, setZonas] = useState<{id: string; nombre: string}[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
   // Map de voluntario_id → true si necesita capacitación
   const [capPendiente, setCapPendiente] = useState<Record<string, boolean>>({});
 
@@ -75,6 +76,7 @@ function UsuariosPageContent() {
   const fetchUsuarios = async () => {
     try {
       setLoading(true);
+      setApiError(null);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) { router.push('/login'); return; }
 
@@ -82,9 +84,18 @@ function UsuariosPageContent() {
         headers: { 'Authorization': `Bearer ${session.access_token}` }
       });
 
-      if (!response.ok) throw new Error('Error al cargar usuarios');
-      const { usuarios: usuariosData } = await response.json();
-      setUsuarios(usuariosData);
+      const json = await response.json();
+      console.log('[usuarios] API response:', response.status, json);
+
+      if (!response.ok) {
+        setApiError(`Error ${response.status}: ${json.error || 'Desconocido'}`);
+        return;
+      }
+      if (!json.usuarios) {
+        setApiError(`La API no devolvió usuarios. Respuesta: ${JSON.stringify(json)}`);
+        return;
+      }
+      setUsuarios(json.usuarios);
 
       // Cargar todas las zonas disponibles
       supabase
@@ -94,7 +105,7 @@ function UsuariosPageContent() {
         .then(({ data }: { data: {id: string; nombre: string}[] | null }) => { if (data) setZonas(data); });
 
       // Cargar estado de capacitaciones para voluntarios
-      const voluntariosIds = (usuariosData as Usuario[]).filter(u => u.rol === 'voluntario').map(u => u.id);
+      const voluntariosIds = (json.usuarios as Usuario[]).filter(u => u.rol === 'voluntario').map(u => u.id);
       if (voluntariosIds.length > 0) {
         const { data: scores } = await supabase
           .from('scores_voluntarios_por_area')
@@ -316,6 +327,13 @@ function UsuariosPageContent() {
             </select>
           </div>
         </div>
+
+        {/* Error de API */}
+        {apiError && (
+          <div className="mb-4 bg-red-50 border border-red-200 rounded-2xl p-4">
+            <p className="text-sm text-red-700 font-medium font-outfit">⚠️ {apiError}</p>
+          </div>
+        )}
 
         {/* Contador */}
         <p className="mb-4 text-sm text-neutro-piedra font-outfit">
