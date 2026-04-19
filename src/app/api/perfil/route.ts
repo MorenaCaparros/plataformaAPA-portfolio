@@ -22,13 +22,7 @@ export async function GET(request: NextRequest) {
 
     const { data: perfil, error } = await supabaseAdmin
       .from('perfiles')
-      .select(`
-        id, nombre, apellido, rol, zona_id, fecha_nacimiento,
-        telefono, email, direccion, foto_perfil_url, fecha_ingreso,
-        max_ninos_asignados, horas_disponibles, activo, notas, ultima_conexion,
-        created_at, updated_at,
-        zonas ( id, nombre )
-      `)
+      .select(`*, zonas ( id, nombre )`)
       .eq('id', user.id)
       .single();
 
@@ -53,8 +47,7 @@ export async function PATCH(request: NextRequest) {
 
     // Campos que un usuario puede actualizar de su propio perfil
     const camposPermitidos = [
-      'nombre', 'apellido', 'telefono', 'direccion',
-      'fecha_nacimiento', 'foto_perfil_url',
+      'nombre', 'apellido', 'foto_perfil_url',
       'max_ninos_asignados', 'horas_disponibles'
     ];
 

@@ -24,10 +24,7 @@ interface PerfilCompleto {
   apellido: string;
   rol: string;
   zona_id: string | null;
-  fecha_nacimiento: string | null;
-  telefono: string | null;
   email: string;
-  direccion: string | null;
   foto_perfil_url: string | null;
   fecha_ingreso: string | null;
   activo: boolean;
@@ -51,9 +48,6 @@ export default function MiPerfilPage() {
   // Form state
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [direccion, setDireccion] = useState('');
-  const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [maxNinos, setMaxNinos] = useState<number>(3);
   const [horasDisponibles, setHorasDisponibles] = useState<number>(4);
 
@@ -81,9 +75,6 @@ export default function MiPerfilPage() {
       // Populate form
       setNombre(data.nombre || '');
       setApellido(data.apellido || '');
-      setTelefono(data.telefono || '');
-      setDireccion(data.direccion || '');
-      setFechaNacimiento(data.fecha_nacimiento || '');
       if (data.max_ninos_asignados != null) setMaxNinos(data.max_ninos_asignados);
       if (data.horas_disponibles != null) setHorasDisponibles(data.horas_disponibles);
     } catch (error) {
@@ -117,9 +108,6 @@ export default function MiPerfilPage() {
         body: JSON.stringify({
           nombre: nombre.trim(),
           apellido: apellido.trim(),
-          telefono: telefono.trim() || null,
-          direccion: direccion.trim() || null,
-          fecha_nacimiento: fechaNacimiento || null,
           ...(perfilCompleto?.rol === 'voluntario' ? {
             max_ninos_asignados: maxNinos,
             horas_disponibles: horasDisponibles,
@@ -364,47 +352,6 @@ export default function MiPerfilPage() {
                     onChange={(e) => setApellido(e.target.value)}
                     className="w-full px-4 py-3 bg-white/80 border border-white/60 rounded-2xl focus:ring-2 focus:ring-crecimiento-400 focus:border-transparent text-neutro-carbon font-outfit transition-all min-h-[48px]"
                     placeholder="Tu apellido"
-                  />
-                </div>
-
-                {/* Teléfono */}
-                <div>
-                  <label className="block text-sm font-medium text-neutro-piedra mb-1.5 font-outfit">
-                    Teléfono
-                  </label>
-                  <input
-                    type="tel"
-                    value={telefono}
-                    onChange={(e) => setTelefono(e.target.value)}
-                    className="w-full px-4 py-3 bg-white/80 border border-white/60 rounded-2xl focus:ring-2 focus:ring-crecimiento-400 focus:border-transparent text-neutro-carbon font-outfit transition-all min-h-[48px]"
-                    placeholder="Ej: +54 11 1234-5678"
-                  />
-                </div>
-
-                {/* Fecha de nacimiento */}
-                <div>
-                  <label className="block text-sm font-medium text-neutro-piedra mb-1.5 font-outfit">
-                    Fecha de nacimiento
-                  </label>
-                  <input
-                    type="date"
-                    value={fechaNacimiento}
-                    onChange={(e) => setFechaNacimiento(e.target.value)}
-                    className="w-full px-4 py-3 bg-white/80 border border-white/60 rounded-2xl focus:ring-2 focus:ring-crecimiento-400 focus:border-transparent text-neutro-carbon font-outfit transition-all min-h-[48px]"
-                  />
-                </div>
-
-                {/* Dirección — full width */}
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-neutro-piedra mb-1.5 font-outfit">
-                    Dirección
-                  </label>
-                  <input
-                    type="text"
-                    value={direccion}
-                    onChange={(e) => setDireccion(e.target.value)}
-                    className="w-full px-4 py-3 bg-white/80 border border-white/60 rounded-2xl focus:ring-2 focus:ring-crecimiento-400 focus:border-transparent text-neutro-carbon font-outfit transition-all min-h-[48px]"
-                    placeholder="Tu dirección"
                   />
                 </div>
 
