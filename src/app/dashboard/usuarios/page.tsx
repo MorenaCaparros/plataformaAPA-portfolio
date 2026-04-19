@@ -392,12 +392,6 @@ function UsuariosPageContent() {
                     <Mail className="w-3.5 h-3.5 flex-shrink-0" />
                     <span className="truncate">{u.email}</span>
                   </div>
-                  {u.telefono && (
-                    <div className="flex items-center gap-2 text-neutro-piedra">
-                      <Phone className="w-3.5 h-3.5 flex-shrink-0" />
-                      <span>{u.telefono}</span>
-                    </div>
-                  )}
                   {u.zona_nombre && u.zona_nombre !== 'Sin equipo' && (
                     <div className="flex items-center gap-2 text-neutro-piedra">
                       <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
