@@ -90,7 +90,6 @@ function UsuariosPageContent() {
       supabase
         .from('zonas')
         .select('id, nombre')
-        .eq('activa', true)
         .order('nombre', { ascending: true })
         .then(({ data }: { data: {id: string; nombre: string}[] | null }) => { if (data) setZonas(data); });
 
