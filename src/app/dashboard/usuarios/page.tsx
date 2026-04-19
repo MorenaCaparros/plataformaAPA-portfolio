@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useEffect, useState, Suspense } from 'react';
 import { supabase } from '@/lib/supabase/client';
-import { Upload, Key, Search, LayoutGrid, List, Phone, Mail, MapPin, Eye, UserPlus } from 'lucide-react';
+import { Upload, Key, Search, LayoutGrid, List, Mail, MapPin, Eye, UserPlus } from 'lucide-react';
 
 // Helper: convert any Drive URL to a thumbnail URL that works in <img> tags
 function getDriveImageUrl(url: string | null): string | null {
@@ -27,8 +27,6 @@ interface Usuario {
   created_at: string;
   nombre: string;
   apellido: string;
-  telefono: string | null;
-  direccion: string | null;
   foto_perfil_url: string | null;
   fecha_ingreso: string | null;
   activo: boolean;
@@ -105,19 +103,21 @@ function UsuariosPageContent() {
         .then(({ data }: { data: {id: string; nombre: string}[] | null }) => { if (data) setZonas(data); });
 
       // Cargar estado de capacitaciones para voluntarios
+      // Usa voluntarios_capacitaciones: voluntario con al menos 1 capacitacion completada = al día
       const voluntariosIds = (json.usuarios as Usuario[]).filter(u => u.rol === 'voluntario').map(u => u.id);
       if (voluntariosIds.length > 0) {
-        const { data: scores } = await supabase
-          .from('scores_voluntarios_por_area')
-          .select('voluntario_id, necesita_capacitacion')
-          .in('voluntario_id', voluntariosIds);
+        const { data: vCaps } = await supabase
+          .from('voluntarios_capacitaciones')
+          .select('voluntario_id, fecha_completada')
+          .in('voluntario_id', voluntariosIds)
+          .not('fecha_completada', 'is', null);
 
-        if (scores) {
-          // Un voluntario necesita capacitación si AL MENOS UNA área la requiere
+        if (vCaps) {
+          const completados = new Set(vCaps.map((v: any) => v.voluntario_id));
           const map: Record<string, boolean> = {};
-          scores.forEach((s: any) => {
-            if (s.necesita_capacitacion) map[s.voluntario_id] = true;
-            else if (!(s.voluntario_id in map)) map[s.voluntario_id] = false;
+          voluntariosIds.forEach(id => {
+            // false = al día (tiene al menos una), true = pendiente (ninguna completada)
+            map[id] = !completados.has(id);
           });
           setCapPendiente(map);
         }
@@ -161,8 +161,7 @@ function UsuariosPageContent() {
       const q = busqueda.toLowerCase();
       const fullName = `${u.nombre} ${u.apellido}`.toLowerCase();
       const email = u.email.toLowerCase();
-      const tel = (u.telefono || '').toLowerCase();
-      if (!fullName.includes(q) && !email.includes(q) && !tel.includes(q)) return false;
+      if (!fullName.includes(q) && !email.includes(q)) return false;
     }
     return true;
   });
@@ -405,12 +404,6 @@ function UsuariosPageContent() {
                       <span>{u.zona_nombre}</span>
                     </div>
                   )}
-                  {u.direccion && (
-                    <div className="flex items-center gap-2 text-neutro-piedra">
-                      <MapPin className="w-3.5 h-3.5 flex-shrink-0 opacity-0" />
-                      <span className="truncate text-xs">{u.direccion}</span>
-                    </div>
-                  )}
                 </div>
 
                 {/* Expanded detail */}
@@ -490,13 +483,11 @@ function UsuariosPageContent() {
                           )}
                           <div>
                             <div className="font-medium text-sm text-neutro-carbon font-outfit">{u.nombre} {u.apellido}</div>
-                            {u.direccion && <div className="text-xs text-neutro-piedra font-outfit truncate max-w-[200px]">{u.direccion}</div>}
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">
                         <div className="text-sm text-neutro-carbon font-outfit">{u.email}</div>
-                        {u.telefono && <div className="text-xs text-neutro-piedra font-outfit">{u.telefono}</div>}
                       </td>
                       <td className="px-4 py-3">
                         <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${getRolBadgeColor(u.rol)}`}>
