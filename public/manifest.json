@@ -36,17 +36,30 @@
       "short_name": "Niños",
       "description": "Ver niños asignados",
       "url": "/dashboard/ninos",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
       "name": "Nueva Sesión",
       "short_name": "Sesión",
       "description": "Registrar nueva sesión",
       "url": "/dashboard/sesiones",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ],
-  "categories": ["education", "productivity"],
+  "categories": [
+    "education",
+    "productivity"
+  ],
   "lang": "es-AR",
   "dir": "ltr"
 }
