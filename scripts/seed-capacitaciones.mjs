@@ -78,21 +78,23 @@ async function main() {
   const caps = [
     {
       id: CAP_ID_1,
-      nombre: "Autoevaluación de Lenguaje",
+      titulo: "Autoevaluación de Lenguaje",
       descripcion: "Evaluación de habilidades de lenguaje oral y comprensión",
       area: "lenguaje",
       tipo: "autoevaluacion",
-      activa: true,
+      activo: true,
+      puntaje_otorgado: 5,
       duracion_estimada: 20,
       creado_por: ADMIN_ID,
     },
     {
       id: CAP_ID_2,
-      nombre: "Autoevaluación de Lectura y Escritura",
+      titulo: "Autoevaluación de Lectura y Escritura",
       descripcion: "Evaluación de habilidades de lectura y escritura emergente",
       area: "lectura_escritura",
       tipo: "autoevaluacion",
-      activa: true,
+      activo: true,
+      puntaje_otorgado: 5,
       duracion_estimada: 25,
       creado_por: ADMIN_ID,
     },
@@ -172,8 +174,6 @@ async function main() {
   // SEED voluntarios_capacitaciones
   // -------------------------------------------------------------------
   console.log("\n=== SEED VOLUNTARIOS_CAPACITACIONES ===");
-  // NOTE: The page queries these fields: id, capacitacion_id, puntaje_final, porcentaje, fecha_completado, estado
-  // We try both naming conventions; the schema check above will show what's correct.
   const vcs = [
     {
       id: VC_ID_1,
@@ -182,9 +182,8 @@ async function main() {
       estado: "completada",
       fecha_asignacion: "2025-05-01T10:00:00Z",
       fecha_inicio: "2025-05-05T10:00:00Z",
-      fecha_completado: "2025-05-05T11:00:00Z",
+      fecha_completada: "2025-05-05T11:00:00Z",
       puntaje_obtenido: 8,
-      porcentaje: 80,
       notas: "Buena comprensión general del módulo.",
       evaluador_id: EQUIPO_ID,
     },
@@ -195,9 +194,8 @@ async function main() {
       estado: "en_revision",
       fecha_asignacion: "2025-05-10T10:00:00Z",
       fecha_inicio: "2025-05-15T10:00:00Z",
-      fecha_completado: null,
+      fecha_completada: null,
       puntaje_obtenido: null,
-      porcentaje: null,
       notas: null,
       evaluador_id: null,
     },
@@ -212,7 +210,7 @@ async function main() {
   // VERIFICACIÓN FINAL
   // -------------------------------------------------------------------
   console.log("\n=== VERIFICACIÓN FINAL ===");
-  const finalCaps = await get("/rest/v1/capacitaciones?tipo=eq.autoevaluacion&select=id,nombre,area,tipo,activa");
+  const finalCaps = await get("/rest/v1/capacitaciones?tipo=eq.autoevaluacion&select=id,titulo,area,tipo,activo");
   console.log("Capacitaciones autoevaluacion:", JSON.stringify(finalCaps.json));
 
   const finalVCs = await get("/rest/v1/voluntarios_capacitaciones?voluntario_id=eq." + VOL_ID + "&select=*");

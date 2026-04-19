@@ -49,7 +49,7 @@ export default function AutoevaluacionesPage() {
           preguntas:preguntas_capacitacion(id, orden, pregunta, tipo_pregunta, puntaje)
         `)
         .eq('tipo', 'autoevaluacion')
-        .eq('activa', true)
+        .eq('activo', true)
         .order('area');
 
       if (plantillasRes.error) throw plantillasRes.error;
@@ -57,7 +57,7 @@ export default function AutoevaluacionesPage() {
       // Map to old plantilla shape
       const mappedPlantillas = (plantillasRes.data || []).map((c: any) => ({
         id: c.id,
-        titulo: c.nombre,
+        titulo: c.titulo,
         area: c.area,
         descripcion: c.descripcion,
         preguntas: (c.preguntas || []).sort((a: any, b: any) => a.orden - b.orden).map((p: any) => ({
@@ -72,9 +72,9 @@ export default function AutoevaluacionesPage() {
       if (!puedeGestionarPlantillas) {
         const respuestasRes = await supabase
           .from('voluntarios_capacitaciones')
-          .select('id, capacitacion_id, puntaje_final, porcentaje, fecha_completado, estado')
+          .select('id, capacitacion_id, puntaje_obtenido, fecha_completada, estado')
           .eq('voluntario_id', perfil?.id)
-          .order('fecha_completado', { ascending: false });
+          .order('fecha_completada', { ascending: false });
 
         if (respuestasRes.error) throw respuestasRes.error;
         
@@ -83,9 +83,9 @@ export default function AutoevaluacionesPage() {
           id: r.id,
           plantilla_id: r.capacitacion_id,
           // porcentaje is 0-100 (e.g. 75), divide by 10 to get 0-10 scale
-          puntaje_total: r.porcentaje != null ? r.porcentaje / 10 : null,
-          puntaje_automatico: r.porcentaje != null ? r.porcentaje / 10 : null,
-          fecha_completada: r.fecha_completado,
+          puntaje_total: r.puntaje_obtenido ?? null,
+          puntaje_automatico: r.puntaje_obtenido ?? null,
+          fecha_completada: r.fecha_completada,
           estado: r.estado,
         }));
         setRespuestas(mappedRespuestas);
