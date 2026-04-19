@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       .from('perfiles')
       .select(`
         id, nombre, apellido, rol, zona_id,
-        fecha_nacimiento, telefono, email, direccion,
+        telefono, email, direccion,
         foto_perfil_url, fecha_ingreso, max_ninos_asignados,
         activo, password_temporal, ultima_conexion, notas,
         created_at, updated_at,

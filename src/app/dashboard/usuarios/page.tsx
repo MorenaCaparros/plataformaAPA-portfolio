@@ -30,7 +30,6 @@ interface Usuario {
   telefono: string | null;
   direccion: string | null;
   foto_perfil_url: string | null;
-  fecha_nacimiento: string | null;
   fecha_ingreso: string | null;
   activo: boolean;
   ultima_conexion: string | null;
@@ -416,12 +415,6 @@ function UsuariosPageContent() {
                 {/* Expanded detail */}
                 {perfilExpandido === u.id && (
                   <div className="mt-3 pt-3 border-t border-white/40 space-y-1.5 text-xs font-outfit text-neutro-piedra">
-                    {u.fecha_nacimiento && (
-                      <div className="flex justify-between">
-                        <span>Nacimiento:</span>
-                        <span className="text-neutro-carbon">{new Date(u.fecha_nacimiento).toLocaleDateString('es-AR')}</span>
-                      </div>
-                    )}
                     <div className="flex justify-between">
                       <span>Ingreso:</span>
                       <span className="text-neutro-carbon">{u.fecha_ingreso ? new Date(u.fecha_ingreso).toLocaleDateString('es-AR') : '—'}</span>
