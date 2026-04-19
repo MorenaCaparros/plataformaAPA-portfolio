@@ -22,7 +22,6 @@ interface Evaluacion {
   nino: {
     id: string;
     alias: string;
-    fecha_nacimiento: string | null;
     rango_etario: string | null;
     zona?: { nombre: string } | null;
   } | null;
@@ -85,12 +84,16 @@ export default function EvaluacionesPage() {
   async function fetchEvaluaciones() {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      // Try with entrevistador join; if FK can't be resolved, fallback to base fields
+      let data: any[] | null = null;
+      let queryError: any = null;
+
+      const res = await supabase
         .from('entrevistas')
         .select(`
           id, nino_id, fecha, tipo, observaciones, conclusiones, acciones_sugeridas,
-          nino:ninos!entrevistas_nino_id_fkey(
-            id, alias, fecha_nacimiento, rango_etario,
+          nino:ninos(
+            id, alias, rango_etario,
             zona:zonas(nombre)
           ),
           entrevistador:perfiles!entrevistas_entrevistador_id_fkey(nombre, apellido)
@@ -98,10 +101,26 @@ export default function EvaluacionesPage() {
         .eq('tipo', 'inicial')
         .order('fecha', { ascending: false })
         .limit(200);
-      if (error) throw error;
+
+      if (res.error) {
+        // Fallback: query without entrevistador join
+        const res2 = await supabase
+          .from('entrevistas')
+          .select('id, nino_id, fecha, tipo, observaciones, conclusiones, acciones_sugeridas, nino:ninos(id, alias, rango_etario, zona:zonas(nombre))')
+          .eq('tipo', 'inicial')
+          .order('fecha', { ascending: false })
+          .limit(200);
+        data = res2.data;
+        queryError = res2.error;
+      } else {
+        data = res.data;
+      }
+
+      if (queryError) throw queryError;
       setEvaluaciones((data as Evaluacion[]) || []);
     } catch (error) {
       console.error('Error al cargar evaluaciones:', error);
+      setEvaluaciones([]);
     } finally {
       setLoading(false);
     }

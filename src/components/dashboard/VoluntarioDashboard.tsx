@@ -102,7 +102,7 @@ export default function VoluntarioDashboard({ userId }: VoluntarioDashboardProps
             id: nino.id,
             alias: nino.alias,
             rango_etario: nino.rango_etario,
-            fecha_nacimiento: nino.fecha_nacimiento ?? null,
+            fecha_nacimiento: null,
             nivel_alfabetizacion: nino.nivel_alfabetizacion ?? '',
             mis_sesiones: 0,
             total_sesiones: 0,

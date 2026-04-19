@@ -41,7 +41,7 @@ interface NinoConAsignacion {
     voluntario_id: string;
     voluntario_nombre: string;
     fecha_asignacion: string;
-    score_matching: number;
+    score_matching: number | null;
   } | null;
   tiene_deficits: boolean;
 }
@@ -153,15 +153,16 @@ function AsignacionesPageContent() {
           id,
           nino_id,
           voluntario_id,
-          fecha_asignacion,
-          score_matching,
-          voluntario:perfiles!asignaciones_voluntario_id_fkey(id, nombre, apellido)
+          fecha_inicio,
+          voluntario:perfiles(id, nombre, apellido)
         `)
         .eq('activa', true);
       if (asigError) throw asigError;
 
       const asignaciones = (asignacionesData || []).map((a: any) => ({
         ...a,
+        fecha_asignacion: a.fecha_inicio,
+        score_matching: null,
         voluntario_nombre: a.voluntario
           ? [a.voluntario.nombre, a.voluntario.apellido].filter(Boolean).join(' ')
           : 'Voluntario',
@@ -221,7 +222,6 @@ function AsignacionesPageContent() {
           id,
           nino_id,
           voluntario_id,
-          score_matching,
           nino:ninos(id, alias)
         `)
         .eq('activa', true);
@@ -254,7 +254,7 @@ function AsignacionesPageContent() {
           ninos_asignados: asignacionesVol.map((a: any) => ({
             id: a.nino?.id,
             alias: a.nino?.alias || 'Sin alias',
-            score: a.score_matching || 0,
+            score: 0,
           })),
         };
       });

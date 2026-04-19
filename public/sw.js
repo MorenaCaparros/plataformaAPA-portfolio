@@ -70,11 +70,13 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Cachear respuesta exitosa
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
+          // Solo cachear GET exitosas (PUT no es soportado en Cache API)
+          if (request.method === 'GET' && response.ok) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone);
+            });
+          }
           return response;
         })
         .catch(() => {
@@ -95,23 +97,27 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(request).then((cached) => {
       if (cached) {
-        // Actualizar caché en background
-        fetch(request).then((response) => {
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, response);
+        // Actualizar caché en background (solo GET)
+        if (request.method === 'GET') {
+          fetch(request).then((response) => {
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, response);
+            });
           });
-        });
+        }
         return cached;
       }
 
       // Si no está en caché, fetch
       return fetch(request)
         .then((response) => {
-          // Cachear la respuesta
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
+          // Cachear la respuesta (solo GET)
+          if (request.method === 'GET') {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone);
+            });
+          }
           return response;
         })
         .catch(() => {

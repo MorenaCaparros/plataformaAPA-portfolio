@@ -49,12 +49,11 @@ export async function GET(request: NextRequest) {
           id,
           alias,
           rango_etario,
-          fecha_nacimiento,
           nivel_alfabetizacion
         )
       `)
       .eq('activa', activo)
-      .order('fecha_asignacion', { ascending: false });
+      .order('fecha_inicio', { ascending: false });
 
     if (idConsulta) {
       query = query.eq('voluntario_id', idConsulta);

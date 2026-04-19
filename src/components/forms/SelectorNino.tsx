@@ -8,7 +8,6 @@ interface Nino {
   id: string;
   alias: string;
   rango_etario: string;
-  fecha_nacimiento: string | null;
   legajo: string | null;
 }
 
@@ -41,7 +40,7 @@ export default function SelectorNino({
     try {
       const { data, error } = await supabase
         .from('ninos')
-        .select('id, alias, rango_etario, fecha_nacimiento, legajo')
+        .select('id, alias, rango_etario, legajo')
         .order('alias', { ascending: true });
 
       if (error) throw error;
@@ -117,7 +116,7 @@ export default function SelectorNino({
                     {nino.alias}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {nino.legajo ? `Legajo: ${nino.legajo} • ` : ''}{formatearEdad(nino.fecha_nacimiento, nino.rango_etario)}
+                    {nino.legajo ? `Legajo: ${nino.legajo} • ` : ''}{formatearEdad(null, nino.rango_etario)}
                   </p>
                 </div>
                 {selectedNino === nino.id && (
