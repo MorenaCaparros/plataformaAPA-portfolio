@@ -643,9 +643,6 @@ function AsignacionesPageContent() {
                               <span className="font-medium text-gray-700">
                                 {nino.asignacion.voluntario_nombre}
                               </span>
-                              <span className={`font-semibold ${getScoreColor(nino.asignacion.score_matching)}`}>
-                                {nino.asignacion.score_matching?.toFixed(0)}%
-                              </span>
                             </div>
                             <p className="text-xs text-gray-500">
                               Desde {new Date(nino.asignacion.fecha_asignacion).toLocaleDateString('es-AR')}
