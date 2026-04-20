@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase/client';
 
 const DEMO_USERS = [
-  { label: 'Admin / Director',   email: 'admin.demo.apa@gmail.com',       password: 'Demo1234!', emoji: '🛡️' },
-  { label: 'Equipo Profesional', email: 'equipo.demo.apa@gmail.com',      password: 'Demo1234!', emoji: '🎓' },
-  { label: 'Voluntario',         email: 'voluntario1@demo.apa',           password: 'Demo1234!', emoji: '🙋' },
+  { label: 'Admin / Director',   email: 'admin@demo.apa',       password: 'Demo1234!', emoji: '🛡️' },
+  { label: 'Equipo Profesional', email: 'equipo@demo.apa',      password: 'Demo1234!', emoji: '🎓' },
+  { label: 'Voluntario',         email: 'voluntario1@demo.apa', password: 'Demo1234!', emoji: '🙋' },
 ];
 
 export default function LoginPage() {
