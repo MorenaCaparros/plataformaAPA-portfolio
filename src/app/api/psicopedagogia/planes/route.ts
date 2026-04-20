@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       .from('planes_intervencion')
       .select(`
         *,
-        nino:ninos!planes_intervencion_nino_id_fkey(id, alias, rango_etario, fecha_nacimiento),
+        nino:ninos!planes_intervencion_nino_id_fkey(id, alias, rango_etario),
         creador:perfiles!planes_intervencion_creado_por_fkey(id, nombre, apellido, rol),
         comentarios:comentarios_intervencion(count)
       `)

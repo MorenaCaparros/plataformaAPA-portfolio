@@ -102,7 +102,7 @@ async function main() {
 
   for (const cap of caps) {
     const r = await upsert("/rest/v1/capacitaciones", cap);
-    console.log(`  cap "${cap.nombre}": ${r.status}`, r.status >= 400 ? r.text : "OK");
+    console.log(`  cap "${cap.titulo}": ${r.status}`, r.status >= 400 ? r.text : "OK");
   }
 
   // If 'activo' failed, try 'activa'
@@ -191,7 +191,7 @@ async function main() {
       id: VC_ID_2,
       voluntario_id: VOL_ID,
       capacitacion_id: CAP_ID_2,
-      estado: "en_revision",
+      estado: "aprobada",
       fecha_asignacion: "2025-05-10T10:00:00Z",
       fecha_inicio: "2025-05-15T10:00:00Z",
       fecha_completada: null,

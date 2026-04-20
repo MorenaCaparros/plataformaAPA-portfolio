@@ -53,7 +53,7 @@ export async function GET(
 
     // Cargar datos del niño (sin datos sensibles para voluntarios)
     const selectFields = rol === 'voluntario'
-      ? 'id, alias, legajo, rango_etario, fecha_nacimiento, nivel_alfabetizacion, escolarizado, grado_escolar, turno_escolar, activo, zona_id, zonas(id, nombre), escuelas(id, nombre)'
+      ? 'id, alias, legajo, rango_etario, nivel_alfabetizacion, escolarizado, grado_escolar, turno_escolar, activo, zona_id, zonas(id, nombre), escuelas(id, nombre)'
       : '*, zonas(id, nombre), escuelas(id, nombre)';
 
     const { data: nino, error: ninoError } = await supabaseAdmin

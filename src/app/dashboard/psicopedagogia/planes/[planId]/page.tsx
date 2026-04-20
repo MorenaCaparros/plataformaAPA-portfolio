@@ -160,11 +160,70 @@ export default function PlanDetailPage() {
   async function fetchPlan() {
     try {
       setLoading(true);
+
+      // Si es un plan mock (tabla no existe), buscar en mock data
+      if (planId.startsWith('mock-')) {
+        const mockPlanes: Plan[] = [
+          {
+            id: 'mock-1', nino_id: 'mock-nino-1', creado_por: 'mock-creador-1',
+            titulo: 'Plan de Lectoescritura Inicial',
+            descripcion: 'Refuerzo de reconocimiento de letras y sílabas mediante actividades lúdicas.',
+            area: 'lectura_escritura', estado: 'activo', prioridad: 'alta',
+            fecha_inicio: '2024-03-01', fecha_fin_estimada: '2024-06-01', fecha_cierre: null,
+            objetivos: ['Reconocer letras del abecedario', 'Leer sílabas simples', 'Escribir su nombre'],
+            actividades_sugeridas: 'Lectura de cuentos cortos, ejercicios de copiado, juegos de letras.',
+            created_at: '2024-03-01T10:00:00Z', updated_at: '2024-03-01T10:00:00Z',
+            nino: { id: 'mock-nino-1', alias: 'Tomás R.', rango_etario: '8-10', fecha_nacimiento: '' },
+            creador: { id: 'mock-creador-1', nombre: 'María', apellido: 'López', rol: 'psicopedagogia' },
+          },
+          {
+            id: 'mock-2', nino_id: 'mock-nino-2', creado_por: 'mock-creador-1',
+            titulo: 'Desarrollo de Nociones Matemáticas',
+            descripcion: 'Trabajo con conteo, seriación y operaciones básicas adaptadas al nivel.',
+            area: 'nociones_matematicas', estado: 'activo', prioridad: 'media',
+            fecha_inicio: '2024-02-15', fecha_fin_estimada: '2024-05-15', fecha_cierre: null,
+            objetivos: ['Contar hasta 20', 'Reconocer números del 1 al 10', 'Sumas simples'],
+            actividades_sugeridas: 'Juegos de conteo con objetos, fichas numéricas, dominó.',
+            created_at: '2024-02-15T09:00:00Z', updated_at: '2024-02-15T09:00:00Z',
+            nino: { id: 'mock-nino-2', alias: 'Valentina C.', rango_etario: '8-10', fecha_nacimiento: '' },
+            creador: { id: 'mock-creador-1', nombre: 'María', apellido: 'López', rol: 'psicopedagogia' },
+          },
+          {
+            id: 'mock-3', nino_id: 'mock-nino-3', creado_por: 'mock-creador-2',
+            titulo: 'Expresión Oral y Vocabulario',
+            descripcion: 'Ampliación del vocabulario y fluidez en expresión oral mediante cuentos y juegos.',
+            area: 'lenguaje_vocabulario', estado: 'pausado', prioridad: 'baja',
+            fecha_inicio: '2024-01-10', fecha_fin_estimada: '2024-04-10', fecha_cierre: null,
+            objetivos: ['Narrar un cuento', 'Ampliar vocabulario temático', 'Mejorar pronunciación'],
+            actividades_sugeridas: 'Lectura en voz alta, dramatizaciones, rondas de vocabulario.',
+            created_at: '2024-01-10T11:00:00Z', updated_at: '2024-01-10T11:00:00Z',
+            nino: { id: 'mock-nino-3', alias: 'Sebastián M.', rango_etario: '11-13', fecha_nacimiento: '' },
+            creador: { id: 'mock-creador-2', nombre: 'Carlos', apellido: 'Sánchez', rol: 'equipo_profesional' },
+          },
+          {
+            id: 'mock-4', nino_id: 'mock-nino-1', creado_por: 'mock-creador-1',
+            titulo: 'Grafismo y Motricidad Fina',
+            descripcion: 'Ejercicios de trazado, recorte y técnicas de grafismo para mejorar la motricidad fina.',
+            area: 'grafismo_motricidad', estado: 'completado', prioridad: 'media',
+            fecha_inicio: '2023-10-01', fecha_fin_estimada: '2024-01-01', fecha_cierre: '2024-01-05',
+            objetivos: ['Trazado de líneas rectas y curvas', 'Uso correcto del lápiz', 'Completar laberintos'],
+            actividades_sugeridas: 'Ejercicios de trazado, recorte de figuras, pintura con dedos.',
+            created_at: '2023-10-01T08:00:00Z', updated_at: '2024-01-05T08:00:00Z',
+            nino: { id: 'mock-nino-1', alias: 'Tomás R.', rango_etario: '8-10', fecha_nacimiento: '' },
+            creador: { id: 'mock-creador-1', nombre: 'María', apellido: 'López', rol: 'psicopedagogia' },
+          },
+        ];
+        const found = mockPlanes.find(p => p.id === planId);
+        setPlan(found || null);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('planes_intervencion')
         .select(`
           *,
-          nino:ninos!planes_intervencion_nino_id_fkey(id, alias, rango_etario, fecha_nacimiento),
+          nino:ninos!planes_intervencion_nino_id_fkey(id, alias, rango_etario),
           creador:perfiles!planes_intervencion_creado_por_fkey(id, nombre, apellido, rol)
         `)
         .eq('id', planId)
@@ -182,6 +241,28 @@ export default function PlanDetailPage() {
   async function fetchComentarios() {
     try {
       setLoadingComentarios(true);
+
+      // Si es un plan mock, devolver comentarios mock
+      if (planId.startsWith('mock-')) {
+        const mockComentarios: Comentario[] = [
+          {
+            id: 'mock-com-1', plan_id: planId, autor_id: 'mock-creador-1',
+            contenido: 'Primer contacto positivo. El niño mostró interés por las actividades propuestas.',
+            tipo: 'seguimiento', created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 10).toISOString(),
+            autor: { id: 'mock-creador-1', nombre: 'María', apellido: 'López', rol: 'psicopedagogia', foto_perfil_url: null },
+          },
+          {
+            id: 'mock-com-2', plan_id: planId, autor_id: 'mock-creador-2',
+            contenido: 'Se observa avance en el reconocimiento de letras. Continuar reforzando vocales.',
+            tipo: 'avance', created_at: new Date(Date.now() - 1000 * 60 * 60 * 24 * 4).toISOString(),
+            autor: { id: 'mock-creador-2', nombre: 'Carlos', apellido: 'Sánchez', rol: 'equipo_profesional', foto_perfil_url: null },
+          },
+        ];
+        setComentarios(mockComentarios);
+        setLoadingComentarios(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('comentarios_intervencion')
         .select(`
@@ -203,6 +284,21 @@ export default function PlanDetailPage() {
   async function enviarComentario(e: React.FormEvent) {
     e.preventDefault();
     if (!nuevoComentario.trim() || !user) return;
+
+    // Para planes mock, simular el agregado localmente
+    if (planId.startsWith('mock-')) {
+      const nuevoMock: Comentario = {
+        id: `mock-com-${Date.now()}`, plan_id: planId, autor_id: user.id,
+        contenido: nuevoComentario.trim(), tipo: tipoComentario as any,
+        created_at: new Date().toISOString(),
+        autor: { id: user.id, nombre: perfil?.nombre || 'Usuario', apellido: perfil?.apellido || '', rol: perfil?.rol || '', foto_perfil_url: null },
+      };
+      setComentarios((prev) => [...prev, nuevoMock]);
+      setNuevoComentario('');
+      setTipoComentario('seguimiento');
+      setTimeout(() => commentEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+      return;
+    }
 
     try {
       setEnviandoComentario(true);

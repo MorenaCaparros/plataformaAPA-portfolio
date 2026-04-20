@@ -40,7 +40,6 @@ export async function GET(
         nino:ninos!entrevistas_nino_id_fkey(
           id,
           alias,
-          fecha_nacimiento,
           rango_etario,
           nivel_alfabetizacion,
           zona:zonas(nombre)

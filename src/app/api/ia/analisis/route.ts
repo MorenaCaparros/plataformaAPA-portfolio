@@ -53,7 +53,7 @@ export async function POST(request: Request) {
         { data: deficits },
         { data: zonas }
       ] = await Promise.all([
-        supabaseAdmin.from('ninos').select('id, alias, rango_etario, zona_id, fecha_nacimiento'),
+        supabaseAdmin.from('ninos').select('id, alias, rango_etario, zona_id'),
         supabaseAdmin.from('sesiones').select('id, nino_id, fecha, duracion_minutos, items, observaciones_libres').order('fecha', { ascending: false }).limit(200),
         supabaseAdmin.from('entrevistas').select('*').order('fecha', { ascending: false }).limit(100),
         supabaseAdmin.from('historico_deficits').select('*').eq('activo', true),
@@ -65,7 +65,7 @@ export async function POST(request: Request) {
         ninos: ninos?.map((n: any) => ({
           id: n.id,
           alias: n.alias,
-          edad: calcularEdad(n.fecha_nacimiento),
+          edad: n.rango_etario,
           rango_etario: n.rango_etario,
           zona_id: n.zona_id
         })),
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
       // Datos específicos de una zona
       const { data: ninosZona } = await supabaseAdmin
         .from('ninos')
-        .select('id, alias, rango_etario, fecha_nacimiento')
+        .select('id, alias, rango_etario')
         .eq('zona_id', zona_id);
 
       const ninoIds = ninosZona?.map((n: any) => n.id) || [];
@@ -117,7 +117,7 @@ export async function POST(request: Request) {
         total_ninos: ninosZona?.length || 0,
         ninos: ninosZona?.map((n: any) => ({
           alias: n.alias,
-          edad: calcularEdad(n.fecha_nacimiento),
+          edad: n.rango_etario,
           rango_etario: n.rango_etario
         })),
         sesiones: sesionesZona?.length || 0,
@@ -146,7 +146,7 @@ export async function POST(request: Request) {
       datosContexto = {
         nino: {
           alias: nino?.alias,
-          edad: calcularEdad(nino?.fecha_nacimiento),
+          edad: nino?.rango_etario,
           rango_etario: nino?.rango_etario
         },
         total_sesiones: sesionesNino?.length || 0,

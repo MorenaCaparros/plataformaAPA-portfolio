@@ -26,7 +26,6 @@ export async function GET(request: Request) {
         nino:ninos!entrevistas_nino_id_fkey(
           id,
           alias,
-          fecha_nacimiento,
           rango_etario
         ),
         entrevistador:perfiles!entrevistas_entrevistador_id_fkey(
