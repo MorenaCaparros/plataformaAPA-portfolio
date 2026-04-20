@@ -191,7 +191,7 @@ async function main() {
       id: VC_ID_2,
       voluntario_id: VOL_ID,
       capacitacion_id: CAP_ID_2,
-      estado: "aprobada",
+      estado: "en_curso",
       fecha_asignacion: "2025-05-10T10:00:00Z",
       fecha_inicio: "2025-05-15T10:00:00Z",
       fecha_completada: null,

@@ -231,7 +231,7 @@ function AsignacionesPageContent() {
       const { data: autoevaluaciones } = await supabase
         .from('voluntarios_capacitaciones')
         .select('voluntario_id')
-        .in('estado', ['aprobada', 'reprobada', 'completada']);
+        .in('estado', ['completada', 'no_aprobada']);
 
       const voluntariosConAutoeval = new Set(
         autoevaluaciones?.map((a: { voluntario_id: string }) => a.voluntario_id) || []

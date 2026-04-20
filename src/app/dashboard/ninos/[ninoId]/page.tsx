@@ -50,8 +50,7 @@ interface Sesion {
 
 interface AsignacionActiva {
   id: string;
-  fecha_asignacion: string;
-  score_matching: number | null;
+  fecha_inicio: string;
   voluntario: Pick<Perfil, 'id' | 'nombre' | 'apellido'> | null;
 }
 
@@ -316,9 +315,9 @@ export default function NinoPerfilPage() {
       try {
         const { data: asignacionData } = await supabase
           .from('asignaciones')
-          .select('id, fecha_asignacion, score_matching, voluntario_id')
+          .select('id, fecha_inicio, voluntario_id')
           .eq('nino_id', ninoId)
-          .eq('activa', true)
+          .eq('estado', 'activa')
           .limit(1)
           .maybeSingle();
 
@@ -335,8 +334,7 @@ export default function NinoPerfilPage() {
           }
           setAsignacionActiva({
             id: asignacionData.id,
-            fecha_asignacion: asignacionData.fecha_asignacion,
-            score_matching: asignacionData.score_matching,
+            fecha_inicio: asignacionData.fecha_inicio,
             voluntario,
           });
         }
@@ -2077,12 +2075,7 @@ export default function NinoPerfilPage() {
                         : 'Sin nombre'}
                     </p>
                     <div className="flex items-center gap-3 text-sm text-gray-600">
-                      <span>Asignado: {formatearFecha(asignacionActiva.fecha_asignacion)}</span>
-                      {asignacionActiva.score_matching != null && asignacionActiva.score_matching > 0 && (
-                        <span className="px-2 py-0.5 bg-crecimiento-100 text-crecimiento-700 rounded-full text-xs font-medium">
-                          Score: {asignacionActiva.score_matching}/100
-                        </span>
-                      )}
+                      <span>Asignado: {formatearFecha(asignacionActiva.fecha_inicio)}</span>
                     </div>
                   </div>
                 </div>
